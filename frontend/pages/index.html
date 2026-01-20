@@ -609,7 +609,7 @@
                     </form>
                     
                     <div class="login-footer">
-                        <p>¿No tienes cuenta? <a href="#" class="register-link">Crear cuenta</a></p>
+                        <p>¿No tienes cuenta? <a href="#" class="register-link" onclick="showRegisterForm()">Crear cuenta</a></p>
                     </div>
                     
                     <!-- Botón para ir al login de administradores -->
@@ -741,6 +741,171 @@
                 window.unifiedThemeManager.init();
             }
         });
+        
+        // Función para mostrar formulario de registro
+        function showRegisterForm() {
+            const loginForm = document.getElementById('userLoginForm');
+            const loginFooter = document.querySelector('.login-footer');
+            
+            // Crear formulario de registro
+            const registerForm = document.createElement('form');
+            registerForm.id = 'registerForm';
+            registerForm.className = 'modern-form';
+            registerForm.innerHTML = `
+                <div class="form-group modern-group">
+                    <label for="registerUsername">Nombre de Usuario</label>
+                    <div class="form-input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="registerUsername" name="username" required 
+                               placeholder="Elige un nombre de usuario">
+                    </div>
+                </div>
+                
+                <div class="form-group modern-group">
+                    <label for="registerEmail">Email</label>
+                    <div class="form-input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="registerEmail" name="email" required 
+                               placeholder="tu@email.com">
+                    </div>
+                </div>
+                
+                <div class="form-group modern-group">
+                    <label for="registerPassword">Contraseña</label>
+                    <div class="form-input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="registerPassword" name="password" required 
+                               placeholder="Mínimo 8 caracteres">
+                        <button type="button" class="toggle-password" data-target="registerPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group modern-group">
+                    <label for="registerConfirmPassword">Confirmar Contraseña</label>
+                    <div class="form-input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="registerConfirmPassword" name="confirmPassword" required 
+                               placeholder="Repite tu contraseña">
+                        <button type="button" class="toggle-password" data-target="registerConfirmPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group modern-group">
+                    <label for="registerFullName">Nombre Completo (Opcional)</label>
+                    <div class="form-input-wrapper">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" id="registerFullName" name="fullName" 
+                               placeholder="Tu nombre completo">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary modern-btn">
+                    <i class="fas fa-user-plus"></i> Crear Cuenta
+                </button>
+                
+                <div class="login-footer">
+                    <p>¿Ya tienes cuenta? <a href="#" class="register-link" onclick="hideRegisterForm()">Iniciar sesión</a></p>
+                </div>
+            `;
+            
+            // Reemplazar el formulario de login con el de registro
+            loginForm.style.display = 'none';
+            loginFooter.style.display = 'none';
+            
+            const loginCard = loginForm.parentElement;
+            loginCard.insertBefore(registerForm, loginFooter);
+            
+            // Añadir event listener al formulario de registro
+            registerForm.addEventListener('submit', handleRegister);
+            
+            // Re-inicializar toggle password para los nuevos campos
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const passwordInput = document.getElementById(targetId);
+                    const icon = this.querySelector('i');
+                    
+                    if (passwordInput && icon) {
+                        if (passwordInput.type === 'password') {
+                            passwordInput.type = 'text';
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            passwordInput.type = 'password';
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Función para ocultar formulario de registro
+        function hideRegisterForm() {
+            const registerForm = document.getElementById('registerForm');
+            const loginForm = document.getElementById('userLoginForm');
+            const loginFooter = document.querySelector('.login-footer');
+            
+            if (registerForm) {
+                registerForm.remove();
+            }
+            
+            loginForm.style.display = 'block';
+            loginFooter.style.display = 'block';
+        }
+        
+        // Función de registro de usuario
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const fullName = document.getElementById('registerFullName').value;
+            
+            // Validaciones
+            if (password !== confirmPassword) {
+                window.LaboriaAPI.showNotification('Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            if (password.length < 8) {
+                window.LaboriaAPI.showNotification('La contraseña debe tener al menos 8 caracteres', 'error');
+                return;
+            }
+            
+            try {
+                console.log('Intentando registrar usuario:', { username, email, fullName });
+                
+                const response = await window.LaboriaAPI.registerUsuario({
+                    username,
+                    email,
+                    password,
+                    confirmPassword,
+                    fullName
+                });
+                
+                if (response.success) {
+                    console.log('Registro exitoso:', response);
+                    window.LaboriaAPI.showNotification('¡Cuenta creada exitosamente! Por favor inicia sesión.', 'success');
+                    
+                    // Limpiar formulario y volver al login
+                    hideRegisterForm();
+                    document.getElementById('userLoginForm').reset();
+                } else {
+                    console.error('Error en registro:', response.message);
+                    window.LaboriaAPI.showNotification(response.message || 'Error en el registro', 'error');
+                }
+            } catch (error) {
+                console.error('Error en registro:', error);
+                window.LaboriaAPI.showNotification('Error de conexión. Intenta nuevamente.', 'error');
+            }
+        }
         
         // Función de login de usuario
         async function handleUserLogin(event) {

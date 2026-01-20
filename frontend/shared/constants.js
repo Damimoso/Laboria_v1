@@ -6,7 +6,7 @@
 const API_CONFIG = {
     BASE_URL: process.env.NODE_ENV === 'production' 
         ? process.env.API_BASE_URL || 'https://api.laboria.com'
-        : 'http://localhost:5500/api',
+        : 'http://localhost:3000/api',
     TIMEOUT: parseInt(process.env.API_TIMEOUT) || 10000,
     RETRY_ATTEMPTS: parseInt(process.env.API_RETRY_ATTEMPTS) || 3,
     ENDPOINTS: {

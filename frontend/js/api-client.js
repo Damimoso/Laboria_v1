@@ -9,7 +9,7 @@ class LaboriaAPIClient {
             console.error('❌ Constants no cargadas. Asegúrate de incluir shared/constants.js');
             // Usar configuración por defecto si constants no está disponible
             this.config = {
-                BASE_URL: 'http://localhost:5500/api',
+                BASE_URL: 'http://localhost:3000/api',
                 TIMEOUT: 10000,
                 RETRY_ATTEMPTS: 3,
                 ENDPOINTS: {
