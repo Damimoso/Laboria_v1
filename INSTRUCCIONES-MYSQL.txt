@@ -1,0 +1,73 @@
+========================================
+INSTRUCCIONES PARA CONFIGURAR MYSQL MANUALMENTE
+========================================
+
+PROBLEMA: MySQL requiere configuración manual porque la contraseña no es la estándar.
+
+SOLUCIONES:
+
+OPCION 1: USAR MYSQL WORKBENCH (RECOMENDADO)
+---------------------------------------------
+1. Abre MySQL Workbench
+2. Crea una nueva conexión:
+   - Connection Name: Laboria DB
+   - Hostname: 127.0.0.1
+   - Port: 3306
+   - Username: root
+   - Password: (la que configuraste al instalar MySQL)
+3. Conecta a la base de datos
+4. Abre una nueva pestaña de query
+5. Copia y pega el contenido del archivo: CREAR-BD-MANUAL.sql
+6. Ejecuta el script (Ctrl+Enter o botón Execute)
+7. Verifica que aparezcan todas las tablas
+
+OPCION 2: USAR LINEA DE COMANDOS
+----------------------------------
+1. Abre CMD como Administrador
+2. Navega a la carpeta de MySQL:
+   cd "C:\Program Files\MySQL\MySQL Server 8.0\bin"
+3. Conecta a MySQL:
+   mysql -u root -p
+4. Ingresa tu contraseña de MySQL
+5. Ejecuta el script:
+   source C:\Users\DMoares\Desktop\BuscoTrabajo_Intento2\CREAR-BD-MANUAL.sql
+
+OPCION 3: USAR XAMPP/WAMP
+--------------------------
+Si tienes XAMPP o WAMP:
+1. Inicia Apache y MySQL
+2. Abre phpMyAdmin (http://localhost/phpmyadmin)
+3. Crea nueva base de datos: laboria_db
+4. Importa el archivo: CREAR-BD-MANUAL.sql
+
+OPCION 4: MODO DEMO (SIN MYSQL)
+---------------------------------
+Si no quieres configurar MySQL ahora:
+1. El backend funciona en modo demo
+2. Login/registro usan datos simulados
+3. No hay persistencia de datos
+4. Ideal para probar el frontend
+
+VERIFICACION:
+-------------
+Una vez configurado, ejecuta:
+INICIAR-LABORIA.bat
+
+Y prueba en:
+http://localhost:5500/pages/index.html
+
+USUARIOS DE PRUEBA:
+------------------
+Email: admin@laboria.com
+Password: admin123
+
+Email: test@laboria.com  
+Password: test123
+
+NOTA: Las contraseñas están hasheadas en la base de datos.
+Los usuarios de prueba usan el hash de "admin123" y "test123".
+
+========================================
+SI TODO FALLA, CONTINUA SIN MYSQL
+========================================
+El sistema funciona perfectamente para pruebas con el modo demo.

@@ -1,0 +1,1209 @@
+openapi: 3.0.3
+info:
+  title: Laboria API
+  description: API RESTful para plataforma de empleo y formación profesional
+  version: 1.0.0
+  contact:
+    name: Laboria Team
+    email: support@laboria.com
+    url: https://laboria.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de desarrollo
+  - url: https://api.laboria.com/api
+    description: Servidor de producción
+
+paths:
+  /health:
+    get:
+      tags:
+        - Sistema
+      summary: Health check del servidor
+      description: Verifica que el servidor esté funcionando correctamente
+      responses:
+        '200':
+          description: Servidor funcionando correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /auth/login/usuario:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión de usuario
+      description: Autentica un usuario y devuelve un token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/register/usuario:
+    post:
+      tags:
+        - Autenticación
+      summary: Registrar nuevo usuario
+      description: Crea una nueva cuenta de usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/profile:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener perfil de usuario
+      description: Obtiene el perfil completo del usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Perfil obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Usuarios
+      summary: Actualizar perfil de usuario
+      description: Actualiza los datos del perfil del usuario autenticado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Perfil actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /jobs:
+    get:
+      tags:
+        - Empleos
+      summary: Obtener lista de empleos
+      description: Obtiene una lista paginada de empleos con filtros opcionales
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/CategoryParam'
+        - $ref: '#/components/parameters/TypeParam'
+        - $ref: '#/components/parameters/ContractParam'
+        - $ref: '#/components/parameters/ExperienceParam'
+        - $ref: '#/components/parameters/SalaryMinParam'
+        - $ref: '#/components/parameters/SalaryMaxParam'
+      responses:
+        '200':
+          description: Lista de empleos obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobsListResponse'
+
+    post:
+      tags:
+        - Empleos
+      summary: Crear nuevo empleo
+      description: Crea una nueva oferta de empleo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJobRequest'
+      responses:
+        '200':
+          description: Empleo creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /jobs/{id}:
+    get:
+      tags:
+        - Empleos
+      summary: Obtener detalles de empleo
+      description: Obtiene los detalles completos de un empleo específico
+      parameters:
+        - $ref: '#/components/parameters/JobIdParam'
+      responses:
+        '200':
+          description: Detalles del empleo obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobDetailResponse'
+        '404':
+          description: Empleo no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Empleos
+      summary: Actualizar empleo
+      description: Actualiza los datos de un empleo existente
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/JobIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJobRequest'
+      responses:
+        '200':
+          description: Empleo actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+        '403':
+          description: Permisos insuficientes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Empleo no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Empleos
+      summary: Eliminar empleo
+      description: Elimina un empleo existente
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/JobIdParam'
+      responses:
+        '200':
+          description: Empleo eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '403':
+          description: Permisos insuficientes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Empleo no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /jobs/{id}/apply:
+    post:
+      tags:
+        - Empleos
+      summary: Postularse a empleo
+      description: Crea una nueva postulación a un empleo
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/JobIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyJobRequest'
+      responses:
+        '200':
+          description: Postulación realizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+        '400':
+          description: Error de validación o postulación duplicada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Empleo no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /courses:
+    get:
+      tags:
+        - Cursos
+      summary: Obtener lista de cursos
+      description: Obtiene una lista paginada de cursos con filtros opcionales
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/CategoryParam'
+        - $ref: '#/components/parameters/LevelParam'
+        - $ref: '#/components/parameters/PriceMinParam'
+        - $ref: '#/components/parameters/PriceMaxParam'
+      responses:
+        '200':
+          description: Lista de cursos obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoursesListResponse'
+
+    post:
+      tags:
+        - Cursos
+      summary: Crear nuevo curso
+      description: Crea una nueva oferta de curso
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCourseRequest'
+      responses:
+        '200':
+          description: Curso creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseResponse'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /courses/{id}:
+    get:
+      tags:
+        - Cursos
+      summary: Obtener detalles de curso
+      description: Obtiene los detalles completos de un curso específico
+      parameters:
+        - $ref: '#/components/parameters/CourseIdParam'
+      responses:
+        '200':
+          description: Detalles del curso obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetailResponse'
+        '404':
+          description: Curso no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /courses/{id}/enroll:
+    post:
+      tags:
+        - Cursos
+      summary: Inscribirse a curso
+      description: Inscribe al usuario autenticado en un curso
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CourseIdParam'
+      responses:
+        '200':
+          description: Inscripción realizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentResponse'
+        '400':
+          description: Error de validación o inscripción duplicada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Curso no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Servidor Laboria funcionando correctamente"
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+              example: "healthy"
+            version:
+              type: string
+              example: "1.0.0"
+            environment:
+              type: string
+              example: "development"
+            uptime:
+              type: number
+              example: 123.456
+            memory:
+              type: object
+            timestamp:
+              type: string
+              format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Error en la solicitud"
+        details:
+          type: object
+          additionalProperties: true
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operación exitosa"
+        data:
+          type: object
+          nullable: true
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "usuario@ejemplo.com"
+        password:
+          type: string
+          minLength: 8
+          example: "Password123!"
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: "^[a-zA-Z0-9_]+$"
+          example: "usuario123"
+        email:
+          type: string
+          format: email
+          example: "usuario@ejemplo.com"
+        password:
+          type: string
+          minLength: 8
+          pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]"
+          example: "Password123!"
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Login exitoso"
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    RegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Usuario registrado exitosamente"
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: "usuario123"
+        email:
+          type: string
+          format: email
+          example: "usuario@ejemplo.com"
+        role:
+          type: string
+          enum: [user, admin, empresa]
+          example: "user"
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+          example: "active"
+        created_at:
+          type: string
+          format: date-time
+
+    UserProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Perfil obtenido exitosamente"
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            username:
+              type: string
+              example: "usuario123"
+            email:
+              type: string
+              format: email
+              example: "usuario@ejemplo.com"
+            role:
+              type: string
+              example: "user"
+            profile:
+              $ref: '#/components/schemas/Profile'
+
+    Profile:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Juan"
+        apellido:
+          type: string
+          example: "Pérez"
+        telefono:
+          type: string
+          example: "+1234567890"
+        bio:
+          type: string
+          example: "Desarrollador Full Stack con 5 años de experiencia"
+        habilidades:
+          type: string
+          example: "JavaScript, React, Node.js, Python"
+        experiencia:
+          type: string
+          example: "5 años en desarrollo web"
+        foto_perfil:
+          type: string
+          example: "/uploads/avatar.jpg"
+        disponibilidad:
+          type: string
+          example: "inmediata"
+        salario_minimo:
+          type: number
+          example: 50000
+        salario_maximo:
+          type: number
+          example: 80000
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Juan"
+        apellido:
+          type: string
+          example: "Pérez"
+        telefono:
+          type: string
+          example: "+1234567890"
+        bio:
+          type: string
+          example: "Desarrollador Full Stack con 5 años de experiencia"
+        habilidades:
+          type: string
+          example: "JavaScript, React, Node.js, Python"
+        experiencia:
+          type: string
+          example: "5 años en desarrollo web"
+        linkedin:
+          type: string
+          format: uri
+          example: "https://linkedin.com/in/juanperez"
+        github:
+          type: string
+          format: uri
+          example: "https://github.com/juanperez"
+        website:
+          type: string
+          format: uri
+          example: "https://juanperez.dev"
+
+    CreateJobRequest:
+      type: object
+      required:
+        - titulo
+        - descripcion
+        - empresa
+        - tipo_contrato
+        - modalidad
+        - categoria
+        - experiencia_requerida
+        - nivel_educativo
+      properties:
+        titulo:
+          type: string
+          minLength: 5
+          maxLength: 200
+          example: "Desarrollador Full Stack Senior"
+        descripcion:
+          type: string
+          minLength: 20
+          maxLength: 5000
+          example: "Buscamos desarrollador senior con experiencia en React y Node.js"
+        empresa:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: "Tech Company"
+        ubicacion:
+          type: string
+          maxLength: 100
+          example: "Madrid, España"
+        salario_minimo:
+          type: number
+          minimum: 0
+          example: 50000
+        salario_maximo:
+          type: number
+          minimum: 0
+          example: 80000
+        tipo_contrato:
+          type: string
+          enum: [tiempo_completo, medio_tiempo, freelance, practicas, temporal]
+          example: "tiempo_completo"
+        modalidad:
+          type: string
+          enum: [presencial, remoto, hibrido]
+          example: "remoto"
+        categoria:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Tecnología"
+        requisitos:
+          type: string
+          maxLength: 2000
+          example: "5+ años de experiencia en desarrollo web"
+        beneficios:
+          type: string
+          maxLength: 1000
+          example: "Seguro médico, trabajo remoto, formación continua"
+        habilidades_requeridas:
+          type: string
+          maxLength: 1000
+          example: "JavaScript, React, Node.js, Python"
+        experiencia_requerida:
+          type: string
+          enum: [sin_experiencia, 1_anio, 2_anios, 3_anios, 5_anios, mas_5_anios]
+          example: "3_anios"
+        nivel_educativo:
+          type: string
+          enum: [secundaria, bachiller, tecnico, universitario, posgrado]
+          example: "universitario"
+        fecha_limite:
+          type: string
+          format: date
+          example: "2024-12-31"
+
+    JobResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Empleo creado exitosamente"
+        data:
+          $ref: '#/components/schemas/Job'
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        titulo:
+          type: string
+          example: "Desarrollador Full Stack Senior"
+        descripcion:
+          type: string
+          example: "Buscamos desarrollador senior con experiencia en React y Node.js"
+        empresa:
+          type: string
+          example: "Tech Company"
+        ubicacion:
+          type: string
+          example: "Madrid, España"
+        salario_minimo:
+          type: number
+          example: 50000
+        salario_maximo:
+          type: number
+          example: 80000
+        tipo_contrato:
+          type: string
+          example: "tiempo_completo"
+        modalidad:
+          type: string
+          example: "remoto"
+        categoria:
+          type: string
+          example: "Tecnología"
+        experiencia_requerida:
+          type: string
+          example: "3_anios"
+        nivel_educativo:
+          type: string
+          example: "universitario"
+        status:
+          type: string
+          example: "active"
+        vistas:
+          type: integer
+          example: 150
+        postulaciones_count:
+          type: integer
+          example: 25
+        publicado_por:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    JobsListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Empleos obtenidos exitosamente"
+        data:
+          type: object
+          properties:
+            jobs:
+              type: array
+              items:
+                $ref: '#/components/schemas/Job'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+            filters:
+              type: object
+              additionalProperties: true
+
+    Pagination:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        total_pages:
+          type: integer
+          example: 10
+        total_items:
+          type: integer
+          example: 95
+        items_per_page:
+          type: integer
+          example: 10
+
+    ApplyJobRequest:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          maxLength: 1000
+          example: "Estoy muy interesado en esta posición"
+        cv_url:
+          type: string
+          format: uri
+          example: "https://example.com/cv.pdf"
+        portafolio_url:
+          type: string
+          format: uri
+          example: "https://example.com/portfolio"
+
+    ApplicationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Postulación realizada exitosamente"
+        data:
+          type: object
+          properties:
+            postulacion_id:
+              type: integer
+              example: 123
+            empleo:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                titulo:
+                  type: string
+                  example: "Desarrollador Full Stack Senior"
+                empresa:
+                  type: string
+                  example: "Tech Company"
+
+    CreateCourseRequest:
+      type: object
+      required:
+        - titulo
+        - descripcion
+        - nivel
+        - categoria
+      properties:
+        titulo:
+          type: string
+          minLength: 5
+          maxLength: 200
+          example: "Curso de React Avanzado"
+        descripcion:
+          type: string
+          minLength: 20
+          maxLength: 5000
+          example: "Aprende React a nivel avanzado con hooks y optimización"
+        instructor:
+          type: string
+          maxLength: 100
+          example: "Juan Pérez"
+        duracion:
+          type: string
+          maxLength: 50
+          example: "40 horas"
+        nivel:
+          type: string
+          enum: [principiante, intermedio, avanzado]
+          example: "avanzado"
+        categoria:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Programación"
+        precio:
+          type: number
+          minimum: 0
+          example: 99.99
+        precio_original:
+          type: number
+          minimum: 0
+          example: 199.99
+        imagen:
+          type: string
+          format: uri
+          example: "https://example.com/course-image.jpg"
+        contenido:
+          type: string
+          maxLength: 10000
+          example: "Contenido detallado del curso..."
+        objetivos:
+          type: string
+          maxLength: 2000
+          example: "Aprender React avanzado, hooks, optimización..."
+        requisitos_curso:
+          type: string
+          maxLength: 1000
+          example: "Conocimientos básicos de JavaScript y React"
+
+    CourseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Curso creado exitosamente"
+        data:
+          $ref: '#/components/schemas/Course'
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        titulo:
+          type: string
+          example: "Curso de React Avanzado"
+        descripcion:
+          type: string
+          example: "Aprende React a nivel avanzado con hooks y optimización"
+        instructor:
+          type: string
+          example: "Juan Pérez"
+        duracion:
+          type: string
+          example: "40 horas"
+        nivel:
+          type: string
+          example: "avanzado"
+        categoria:
+          type: string
+          example: "Programación"
+        precio:
+          type: number
+          example: 99.99
+        precio_original:
+          type: number
+          example: 199.99
+        rating:
+          type: number
+          example: 4.5
+        inscripciones_count:
+          type: integer
+          example: 150
+        status:
+          type: string
+          example: "active"
+        creado_por:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CoursesListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Cursos obtenidos exitosamente"
+        data:
+          type: object
+          properties:
+            courses:
+              type: array
+              items:
+                $ref: '#/components/schemas/Course'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+            filters:
+              type: object
+              additionalProperties: true
+
+    EnrollmentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Inscripción realizada exitosamente"
+        data:
+          type: object
+          properties:
+            inscripcion_id:
+              type: integer
+              example: 456
+            curso:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                titulo:
+                  type: string
+                  example: "Curso de React Avanzado"
+                precio:
+                  type: number
+                  example: 99.99
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Número de página
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      description: Elementos por página
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+
+    SearchParam:
+      name: q
+      in: query
+      description: Término de búsqueda
+      required: false
+      schema:
+        type: string
+        maxLength: 100
+
+    CategoryParam:
+      name: category
+      in: query
+      description: Categoría
+      required: false
+      schema:
+        type: string
+        maxLength: 50
+
+    TypeParam:
+      name: type
+      in: query
+      description: Tipo de trabajo
+      required: false
+      schema:
+        type: string
+        enum: [presencial, remoto, hibrido]
+
+    ContractParam:
+      name: contract
+      in: query
+      description: Tipo de contrato
+      required: false
+      schema:
+        type: string
+        enum: [tiempo_completo, medio_tiempo, freelance, practicas, temporal]
+
+    ExperienceParam:
+      name: experience
+      in: query
+      description: Nivel de experiencia
+      required: false
+      schema:
+        type: string
+        enum: [sin_experiencia, 1_anio, 2_anios, 3_anios, 5_anios, mas_5_anios]
+
+    SalaryMinParam:
+      name: salary_min
+      in: query
+      description: Salario mínimo
+      required: false
+      schema:
+        type: number
+        minimum: 0
+
+    SalaryMaxParam:
+      name: salary_max
+      in: query
+      description: Salario máximo
+      required: false
+      schema:
+        type: number
+        minimum: 0
+
+    LevelParam:
+      name: level
+      in: query
+      description: Nivel del curso
+      required: false
+      schema:
+        type: string
+        enum: [principiante, intermedio, avanzado]
+
+    PriceMinParam:
+      name: price_min
+      in: query
+      description: Precio mínimo
+      required: false
+      schema:
+        type: number
+        minimum: 0
+
+    PriceMaxParam:
+      name: price_max
+      in: query
+      description: Precio máximo
+      required: false
+      schema:
+        type: number
+        minimum: 0
+
+    JobIdParam:
+      name: id
+      in: path
+      description: ID del empleo
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+
+    CourseIdParam:
+      name: id
+      in: path
+      description: ID del curso
+      required: true
+      schema:
+        type: integer
+        minimum: 1

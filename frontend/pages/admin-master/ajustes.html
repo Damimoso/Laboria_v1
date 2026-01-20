@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboria Admin Master - Ajustes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --text-color: #333;
+            --bg-color: #ffffff;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --header-bg: rgba(255, 255, 255, 0.95);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        
+        body.dark-theme {
+            --primary-color: #4a5fc1;
+            --secondary-color: #5a4a8a;
+            --text-color: #ffffff;
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --header-bg: rgba(45, 45, 45, 0.95);
+        }
+        
+        body.spring-theme {
+            --primary-color: #8bc34a;
+            --secondary-color: #4caf50;
+            --text-color: #2e7d32;
+            --bg-color: #f1f8e9;
+            --card-bg: #ffffff;
+            --border-color: #c8e6c9;
+            --shadow-color: rgba(139, 195, 74, 0.2);
+            --header-bg: rgba(255, 255, 255, 0.95);
+        }
+        
+        body.summer-theme {
+            --primary-color: #ffb74d;
+            --secondary-color: #ff9800;
+            --text-color: #e65100;
+            --bg-color: #fff3e0;
+            --card-bg: #ffffff;
+            --border-color: #ffcc80;
+            --shadow-color: rgba(255, 152, 0, 0.2);
+            --header-bg: rgba(255, 255, 255, 0.95);
+        }
+        
+        body.autumn-theme {
+            --primary-color: #ff7043;
+            --secondary-color: #ff5722;
+            --text-color: #bf360c;
+            --bg-color: #fbe9e7;
+            --card-bg: #ffffff;
+            --border-color: #ffab91;
+            --shadow-color: rgba(255, 87, 34, 0.2);
+            --header-bg: rgba(255, 255, 255, 0.95);
+        }
+        
+        body.winter-theme {
+            --primary-color: #42a5f5;
+            --secondary-color: #2196f3;
+            --text-color: #0d47a1;
+            --bg-color: #e3f2fd;
+            --card-bg: #ffffff;
+            --border-color: #90caf9;
+            --shadow-color: rgba(33, 150, 243, 0.2);
+            --header-bg: rgba(255, 255, 255, 0.95);
+        }
+        
+        .header {
+            background: var(--header-bg);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px var(--shadow-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+        
+        .logo h1 {
+            color: var(--text-color);
+            font-size: 1.5rem;
+        }
+        
+        .admin-badge {
+            background: #f44336;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            width: 300px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .search-bar input {
+            border: none;
+            outline: none;
+            flex: 1;
+            padding: 0.25rem;
+            background: transparent;
+            color: var(--text-color);
+        }
+        
+        .search-bar i {
+            color: var(--primary-color);
+        }
+        
+        .nav {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: var(--text-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .nav a:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .nav a.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .content-header {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .content-header h2 {
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .content-header p {
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+        
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .settings-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .settings-card h3 {
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .settings-card h3 i {
+            color: var(--primary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .theme-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .theme-option {
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+        }
+        
+        .theme-option:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .theme-option.active {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .theme-option i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .theme-option span {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+        
+        .actions-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .success-message.show {
+            display: flex;
+        }
+        
+        .error-message {
+            background: #f44336;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .error-message.show {
+            display: flex;
+        }
+        
+        .password-strength {
+            margin-top: 0.5rem;
+            height: 5px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .password-strength.weak {
+            background: #f44336;
+            width: 33%;
+        }
+        
+        .password-strength.medium {
+            background: #ff9800;
+            width: 66%;
+        }
+        
+        .password-strength.strong {
+            background: #4caf50;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            <h1>Laboria Admin</h1>
+            <span class="admin-badge">Master</span>
+        </div>
+        
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="search" placeholder="Buscar ajustes y configuración...">
+        </div>
+        
+        <nav class="nav">
+            <a href="/pages/admin-master/dashboard.html">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            <a href="/pages/admin-master/usuarios.html">
+                <i class="fas fa-users"></i>
+                Usuarios
+            </a>
+            <a href="/pages/admin-master/admins.html">
+                <i class="fas fa-user-shield"></i>
+                Admins
+            </a>
+            <a href="/pages/admin-master/empleos.html">
+                <i class="fas fa-briefcase"></i>
+                Empleos
+            </a>
+            <a href="/pages/admin-master/cursos.html">
+                <i class="fas fa-graduation-cap"></i>
+                Cursos
+            </a>
+            <a href="/pages/admin-master/analisis.html">
+                <i class="fas fa-chart-line"></i>
+                Análisis
+            </a>
+            <a href="/pages/admin-master/ajustes.html" class="active">
+                <i class="fas fa-cog"></i>
+                Ajustes
+            </a>
+            <a href="#" class="logout-btn" onclick="cerrarSesionAdmin()">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+            </a>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-header">
+            <h2>Ajustes del Sistema</h2>
+            <p>Configura tu perfil y las preferencias del sistema</p>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i>
+            <span id="successText">Cambios guardados correctamente</span>
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText">Error al guardar los cambios</span>
+        </div>
+        
+        <div class="settings-grid">
+            <!-- Credenciales del Usuario -->
+            <div class="settings-card">
+                <h3>
+                    <i class="fas fa-user"></i>
+                    Credenciales del Usuario
+                </h3>
+                
+                <form id="credentialsForm">
+                    <div class="form-group">
+                        <label for="currentEmail">Email Actual</label>
+                        <input type="email" id="currentEmail" value="admin@laboria.com" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newEmail">Nuevo Email</label>
+                        <input type="email" id="newEmail" placeholder="Nuevo email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="currentPassword">Contraseña Actual</label>
+                        <input type="password" id="currentPassword" placeholder="Contraseña actual">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPassword">Nueva Contraseña</label>
+                        <input type="password" id="newPassword" placeholder="Nueva contraseña">
+                        <div class="password-strength" id="passwordStrength"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirmar Contraseña</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Actualizar Credenciales
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Tema Estacional -->
+            <div class="settings-card">
+                <h3>
+                    <i class="fas fa-palette"></i>
+                    Tema Estacional
+                </h3>
+                
+                <div class="form-group">
+                    <label>Selecciona un tema</label>
+                    <div class="theme-selector">
+                        <div class="theme-option active" data-theme="default">
+                            <i class="fas fa-laptop"></i>
+                            <span>Por Defecto</span>
+                        </div>
+                        <div class="theme-option" data-theme="dark">
+                            <i class="fas fa-moon"></i>
+                            <span>Oscuro</span>
+                        </div>
+                        <div class="theme-option" data-theme="spring">
+                            <i class="fas fa-seedling"></i>
+                            <span>Primavera</span>
+                        </div>
+                        <div class="theme-option" data-theme="summer">
+                            <i class="fas fa-sun"></i>
+                            <span>Verano</span>
+                        </div>
+                        <div class="theme-option" data-theme="autumn">
+                            <i class="fas fa-leaf"></i>
+                            <span>Otoño</span>
+                        </div>
+                        <div class="theme-option" data-theme="winter">
+                            <i class="fas fa-snowflake"></i>
+                            <span>Invierno</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="autoTheme">
+                        <input type="checkbox" id="autoTheme" checked>
+                        Cambiar tema automáticamente según la estación
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Notificaciones -->
+            <div class="settings-card">
+                <h3>
+                    <i class="fas fa-bell"></i>
+                    Notificaciones
+                </h3>
+                
+                <div class="form-group">
+                    <label for="emailNotifications">
+                        <input type="checkbox" id="emailNotifications" checked>
+                        Notificaciones por email
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pushNotifications">
+                        <input type="checkbox" id="pushNotifications" checked>
+                        Notificaciones push
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="weeklyReport">
+                        <input type="checkbox" id="weeklyReport" checked>
+                        Reporte semanal
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Seguridad -->
+            <div class="settings-card">
+                <h3>
+                    <i class="fas fa-shield-alt"></i>
+                    Seguridad
+                </h3>
+                
+                <div class="form-group">
+                    <label for="twoFactor">
+                        <input type="checkbox" id="twoFactor">
+                        Autenticación de dos factores
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sessionTimeout">
+                        <input type="checkbox" id="sessionTimeout" checked>
+                        Cerrar sesión automáticamente después de 30 minutos
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginAlerts">
+                        <input type="checkbox" id="loginAlerts" checked>
+                        Alertas de inicio de sesión
+                    </label>
+                </div>
+                
+                <button class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Cerrar Todas las Sesiones
+                </button>
+            </div>
+        </div>
+        
+        <div class="actions-bar">
+            <button class="btn btn-primary" onclick="saveAllSettings()">
+                <i class="fas fa-save"></i>
+                Guardar Todos los Cambios
+            </button>
+            <button class="btn btn-secondary" onclick="resetSettings()">
+                <i class="fas fa-undo"></i>
+                Restablecer Configuración
+            </button>
+        </div>
+    </main>
+    
+    <script>
+        // Función para detectar la estación actual
+        function getCurrentSeason() {
+            const month = new Date().getMonth();
+            if (month >= 2 && month <= 4) return 'spring';
+            if (month >= 5 && month <= 7) return 'summer';
+            if (month >= 8 && month <= 10) return 'autumn';
+            return 'winter';
+        }
+        
+        // Función para aplicar tema
+        function applyTheme(themeName) {
+            const body = document.body;
+            
+            // Remover todas las clases de tema
+            body.className = body.className.replace(/\b\w*-theme\b/g, '');
+            
+            // Aplicar nuevo tema
+            if (themeName !== 'default') {
+                body.classList.add(`${themeName}-theme`);
+            }
+            
+            // Guardar en localStorage
+            localStorage.setItem('selectedTheme', themeName);
+            
+            // Actualizar estado activo
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            document.querySelector(`[data-theme="${themeName}"]`).classList.add('active');
+        }
+        
+        // Función para cambiar tema automáticamente
+        function autoChangeTheme() {
+            if (document.getElementById('autoTheme').checked) {
+                const currentSeason = getCurrentSeason();
+                applyTheme(currentSeason);
+            }
+        }
+        
+        // Función para verificar fortaleza de contraseña
+        function checkPasswordStrength(password) {
+            const strengthBar = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                strengthBar.className = 'password-strength';
+                return;
+            }
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/)) strength++;
+            if (password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            strengthBar.className = 'password-strength';
+            if (strength <= 2) {
+                strengthBar.classList.add('weak');
+            } else if (strength <= 4) {
+                strengthBar.classList.add('medium');
+            } else {
+                strengthBar.classList.add('strong');
+            }
+        }
+        
+        // Función para mostrar mensajes
+        function showMessage(type, message) {
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+            
+            if (type === 'success') {
+                document.getElementById('successText').textContent = message;
+                successMsg.classList.add('show');
+                errorMsg.classList.remove('show');
+            } else {
+                document.getElementById('errorText').textContent = message;
+                errorMsg.classList.add('show');
+                successMsg.classList.remove('show');
+            }
+            
+            // Ocultar mensaje después de 3 segundos
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+                errorMsg.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Función para cerrar sesión de administrador
+        function cerrarSesionAdmin() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión como administrador?')) {
+                // Limpiar datos de sesión
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminData');
+                sessionStorage.clear();
+                
+                // Redirigir a página de login
+                window.location.href = '/pages/index.html';
+            }
+        }
+        
+        // Función para guardar todas las configuraciones
+        function saveAllSettings() {
+            showMessage('success', 'Todos los cambios han sido guardados correctamente');
+        }
+        
+        // Función para restablecer configuración
+        function resetSettings() {
+            if (confirm('¿Estás seguro de que quieres restablecer toda la configuración?')) {
+                applyTheme('default');
+                document.getElementById('credentialsForm').reset();
+                showMessage('success', 'Configuración restablecida correctamente');
+            }
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar tema guardado
+            const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+            applyTheme(savedTheme);
+            
+            // Auto cambio de tema según estación
+            autoChangeTheme();
+            
+            // Event listeners para selección de tema
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const theme = this.dataset.theme;
+                    applyTheme(theme);
+                    document.getElementById('autoTheme').checked = false;
+                });
+            });
+            
+            // Event listener para auto tema
+            document.getElementById('autoTheme').addEventListener('change', autoChangeTheme);
+            
+            // Event listener para fortaleza de contraseña
+            document.getElementById('newPassword').addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+            });
+            
+            // Event listener para formulario de credenciales
+            document.getElementById('credentialsForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (newPassword && newPassword !== confirmPassword) {
+                    showMessage('error', 'Las contraseñas no coinciden');
+                    return;
+                }
+                
+                showMessage('success', 'Credenciales actualizadas correctamente');
+                this.reset();
+            });
+        });
+    </script>
+</body>
+</html>
