@@ -1,0 +1,50 @@
+# =============================================
+# RENDER CONFIGURATION - LABORIA
+# =============================================
+
+services:
+  # Backend API Service
+  - type: web
+    name: laboria-api
+    env: node
+    plan: free
+    buildCommand: "cd backend && npm install --omit=dev && npm run build"
+    startCommand: "cd backend && node server.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_HOST
+        value: localhost
+      - key: DB_PORT
+        value: 5432
+      - key: DB_NAME
+        value: laboria_prod
+      - key: DB_USER
+        value: postgres
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://laboria.onrender.com
+
+  # Frontend Static Service
+  - type: web
+    name: laboria-frontend
+    env: static
+    plan: free
+    buildCommand: "echo 'No build needed for static files'"
+    staticPublishPath: ./frontend
+    envVars:
+      - key: API_BASE_URL
+        value: https://laboria-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+# PostgreSQL Database
+databases:
+  - name: laboria-db
+    plan: free
+    ipAllowList: []

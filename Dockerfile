@@ -31,13 +31,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalar dependencias
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --omit=dev && npm cache clean --force
 
 # Copiar código fuente
 COPY . .
 
-# Construir aplicación
-RUN npm run build
+# Construir aplicación (si existe el script)
+RUN npm run build 2>/dev/null || echo "No build script found, skipping..."
 
 # Etapa 2: Runtime
 FROM node:18-alpine AS runtime

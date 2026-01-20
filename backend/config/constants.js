@@ -14,7 +14,7 @@ try {
         SECURITY_CONFIG: {
             JWT_SECRET: process.env.JWT_SECRET || 'laboria_jwt_secret_2026',
             JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
-            CORS_ORIGINS: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5500'],
+            CORS_ORIGINS: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000', 'http://127.0.0.1:3000'],
             ALLOWED_METHODS: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             ALLOWED_HEADERS: ['Content-Type', 'Authorization', 'X-Requested-With']
         }
@@ -114,7 +114,7 @@ const BACKEND_CONFIG = {
                     FONT_SRC: ["'self'", "https://fonts.gstatic.com"],
                     IMG_SRC: ["'self'", "data:", "https:"],
                     SCRIPT_SRC: ["'self'"],
-                    CONNECT_SRC: ["'self'", "http://localhost:3000", "ws://localhost:3000"]
+                    CONNECT_SRC: ["'self'", "http://localhost:3000", "http://127.0.0.1:3000", "ws://localhost:3000", "ws://127.0.0.1:3000"]
                 }
             },
             HSTS: process.env.NODE_ENV === 'production'

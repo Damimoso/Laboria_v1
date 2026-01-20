@@ -12,6 +12,9 @@ const path = require('path');
 // Cargar configuración de producción
 const productionConfig = require('./config/production');
 
+// Cargar variables de entorno para producción
+require('dotenv').config({ path: '.env.production' });
+
 class ProductionServer {
     constructor() {
         this.config = productionConfig.getConfig();

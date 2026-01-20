@@ -5,14 +5,17 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:prod": "node server-production.js",
     "dev": "nodemon server.js",
+    "build": "echo 'No build step needed for Node.js backend'",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:auth": "jest tests/auth.test.js",
     "test:jobs": "jest tests/jobs.test.js",
     "test:courses": "jest tests/courses.test.js",
-    "test:all": "jest --verbose"
+    "test:all": "jest --verbose",
+    "deploy:render": "node ../start-production.js"
   },
   "keywords": [
     "laboria",
@@ -20,6 +23,10 @@
     "cursos",
     "backend"
   ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "author": "Laboria Team",
   "license": "MIT",
   "dependencies": {
@@ -35,9 +42,10 @@
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.6.5",
     "nodemailer": "^6.9.7",
+    "pg": "^8.11.3",
     "socket.io": "^4.8.3",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "jest": "^29.7.0",

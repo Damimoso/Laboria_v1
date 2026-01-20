@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Laboria</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test API Laboria</h1>
+    
+    <div class="test-section">
+        <h2>1. Health Check</h2>
+        <button onclick="testHealth()">Testear Health</button>
+        <div id="health-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Registro de Usuario</h2>
+        <button onclick="testRegister()">Testear Registro</button>
+        <div id="register-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Login de Usuario</h2>
+        <button onclick="testLogin()">Testear Login</button>
+        <div id="login-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Verificar Configuración</h2>
+        <button onclick="showConfig()">Mostrar Config</button>
+        <div id="config-result" class="result"></div>
+    </div>
+
+    <script>
+        // Determinar URL base automáticamente
+        const isLocalhost = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname.includes('127.0.0.1');
+        
+        const API_BASE_URL = isLocalhost ? 
+            'http://127.0.0.1:3000/api' : 
+            'https://laboria-api.onrender.com/api';
+        
+        console.log('🔍 URL API detectada:', API_BASE_URL);
+        
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(API_BASE_URL + url, {
+                    method: 'GET',
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                
+                const data = await response.json();
+                return { success: response.ok, data, status: response.status };
+            } catch (error) {
+                console.error('Error en request:', error);
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function testHealth() {
+            const result = document.getElementById('health-result');
+            result.innerHTML = '<div class="info">⏳ Probando health check...</div>';
+            
+            const response = await makeRequest('/health');
+            
+            if (response.success) {
+                result.innerHTML = `
+                    <div class="success">
+                        ✅ Health check exitoso<br>
+                        Status: ${response.data.status}<br>
+                        Version: ${response.data.version}<br>
+                        Environment: ${response.data.environment}
+                    </div>
+                `;
+            } else {
+                result.innerHTML = `
+                    <div class="error">
+                        ❌ Error en health check<br>
+                        ${response.error || 'Error desconocido'}
+                    </div>
+                `;
+            }
+        }
+        
+        async function testRegister() {
+            const result = document.getElementById('register-result');
+            result.innerHTML = '<div class="info">⏳ Probando registro...</div>';
+            
+            const userData = {
+                username: 'testuser_' + Date.now(),
+                email: 'test' + Date.now() + '@example.com',
+                password: 'password123',
+                confirmPassword: 'password123',
+                fullName: 'Usuario de Prueba'
+            };
+            
+            const response = await makeRequest('/auth/register/usuario', {
+                method: 'POST',
+                body: JSON.stringify(userData)
+            });
+            
+            if (response.success) {
+                result.innerHTML = `
+                    <div class="success">
+                        ✅ Registro exitoso<br>
+                        Usuario: ${userData.username}<br>
+                        Email: ${userData.email}
+                    </div>
+                `;
+            } else {
+                result.innerHTML = `
+                    <div class="error">
+                        ❌ Error en registro<br>
+                        ${response.error || response.data?.message || 'Error desconocido'}
+                    </div>
+                `;
+            }
+        }
+        
+        async function testLogin() {
+            const result = document.getElementById('login-result');
+            result.innerHTML = '<div class="info">⏳ Probando login...</div>';
+            
+            const loginData = {
+                email: 'test@example.com',
+                password: 'password123'
+            };
+            
+            const response = await makeRequest('/auth/login/usuario', {
+                method: 'POST',
+                body: JSON.stringify(loginData)
+            });
+            
+            if (response.success) {
+                result.innerHTML = `
+                    <div class="success">
+                        ✅ Login exitoso<br>
+                        Token: ${response.data.token ? 'Recibido' : 'No recibido'}<br>
+                        Usuario: ${response.data.user?.username || 'N/A'}
+                    </div>
+                `;
+            } else {
+                result.innerHTML = `
+                    <div class="error">
+                        ❌ Error en login<br>
+                        ${response.error || response.data?.message || 'Error desconocido'}
+                    </div>
+                `;
+            }
+        }
+        
+        function showConfig() {
+            const result = document.getElementById('config-result');
+            result.innerHTML = `
+                <div class="info">
+                    📋 Configuración Detectada:<br><br>
+                    🌐 Hostname: ${window.location.hostname}<br>
+                    🔗 API URL: ${API_BASE_URL}<br>
+                    🌍 Es Localhost: ${isLocalhost}<br>
+                    📱 User Agent: ${navigator.userAgent.split(' ')[0]}<br><br>
+                    <strong>Para probar en producción:</strong><br>
+                    1. Subir a Render<br>
+                    2. Acceder: https://laboria.onrender.com/test-api.html
+                </div>
+            `;
+        }
+        
+        // Auto-test al cargar
+        window.addEventListener('load', () => {
+            console.log('🚀 Página de test cargada');
+            showConfig();
+        });
+    </script>
+</body>
+</html>
