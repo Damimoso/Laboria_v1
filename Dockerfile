@@ -27,14 +27,17 @@ RUN apk add --no-cache \
 # Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar package files
-COPY package*.json ./
+# Copiar package files desde backend
+COPY backend/package*.json ./
 
 # Instalar dependencias
 RUN npm install --omit=dev && npm cache clean --force
 
-# Copiar código fuente
-COPY . .
+# Copiar código fuente del backend
+COPY backend/ ./
+
+# Copiar frontend si existe
+COPY frontend/ ../frontend/
 
 # Construir aplicación (si existe el script)
 RUN npm run build 2>/dev/null || echo "No build script found, skipping..."
@@ -77,8 +80,8 @@ COPY --from=builder --chown=laboria:nodejs /app/middleware ./middleware
 COPY --from=builder --chown=laboria:nodejs /app/websocket ./websocket
 COPY --from=builder --chown=laboria:nodejs /app/docs ./docs
 
-# Copiar frontend build si existe
-COPY --from=builder --chown=laboria:nodejs /app/frontend/build ./frontend/build
+# Copiar frontend si existe
+COPY --from=builder --chown=laboria:nodejs /app/../frontend ./frontend
 
 # Cambiar al usuario no root
 USER laboria
