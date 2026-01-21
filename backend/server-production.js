@@ -145,20 +145,19 @@ class ProductionServer {
 
     async createDirectories() {
         const directories = [
-            'logs',
-            'uploads',
-            'uploads/avatars',
-            'uploads/documents',
-            'uploads/images',
-            'temp',
-            'backups',
-            'certs'
+            './logs',
+            './uploads',
+            './uploads/avatars',
+            './uploads/documents',
+            './uploads/images',
+            './temp',
+            './backups',
+            './certs'
         ];
         
         for (const dir of directories) {
-            const dirPath = path.join(__dirname, dir);
-            if (!fs.existsSync(dirPath)) {
-                fs.mkdirSync(dirPath, { recursive: true });
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true, mode: 0o755 });
                 console.log(`📁 Directorio creado: ${dir}`);
             }
         }
@@ -280,7 +279,7 @@ class ProductionServer {
         });
         
         // Rutas estáticas
-        app.use('/uploads', require('express').static(path.join(__dirname, 'uploads')));
+        app.use('/uploads', require('express').static('./uploads'));
         
         // Middleware para páginas SPA
         app.get('*', (req, res) => {
@@ -292,7 +291,7 @@ class ProductionServer {
             }
             
             // Servir index.html para rutas de frontend
-            const indexPath = path.join(__dirname, '../frontend/pages/index.html');
+            const indexPath = './frontend/pages/index.html';
             if (fs.existsSync(indexPath)) {
                 res.sendFile(indexPath);
             } else {
@@ -350,14 +349,18 @@ class ProductionServer {
         
         const server = http.createServer(app);
         
-        // Iniciar servidor
+        // Iniciar servidor con configuración explícita para Render
         await new Promise((resolve, reject) => {
-            const port = this.config.port;
-            server.listen(port, this.config.host, (error) => {
+            const port = process.env.PORT || 10000;
+            const host = '0.0.0.0';
+            
+            server.listen(port, host, (error) => {
                 if (error) {
+                    console.error(`❌ Error iniciando servidor en ${host}:${port}:`, error);
                     reject(error);
                 } else {
-                    console.log(`🌐 Servidor escuchando en ${this.config.host}:${port}`);
+                    console.log(`🌐 Servidor escuchando en ${host}:${port}`);
+                    console.log(`🔍 Health check disponible en http://${host}:${port}/api/health`);
                     resolve();
                 }
             });
