@@ -314,7 +314,10 @@ class ProductionServer {
             }
             
             // Servir el frontend real
-            const indexPath = '../frontend/pages/index.html';
+            const indexPath = path.join(__dirname, '../frontend/pages/index.html');
+            console.log('🔍 Buscando frontend en:', indexPath);
+            console.log('📁 Existe:', fs.existsSync(indexPath));
+            
             if (fs.existsSync(indexPath)) {
                 res.sendFile(indexPath);
             } else {
