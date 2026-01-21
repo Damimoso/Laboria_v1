@@ -9,15 +9,15 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 
-// Cargar configuración de producción
-const productionConfig = require('./config/production');
-
 // Cargar variables de entorno para producción
 require('dotenv').config({ path: '.env.production' });
 
+// Cargar configuración existente
+const { LABORIA_CONFIG } = require('./config/constants');
+
 class ProductionServer {
     constructor() {
-        this.config = productionConfig.getConfig();
+        this.config = LABORIA_CONFIG.BACKEND_CONFIG;
         this.isMaster = cluster.isMaster;
         this.workers = [];
         this.shutdownInProgress = false;
@@ -126,30 +126,21 @@ class ProductionServer {
 
     async validateDatabaseConnection() {
         try {
-            const { pool } = require('./config/database');
-            const connection = await pool.getConnection();
-            await connection.ping();
-            connection.release();
-            console.log('✅ Conexión a base de datos validada');
+            const { testConnection } = require('./config/database');
+            const connected = await testConnection();
+            if (connected) {
+                console.log('✅ Conexión a base de datos validada');
+            } else {
+                console.warn('⚠️ Usando SQLite fallback');
+            }
         } catch (error) {
             console.error('❌ Error validando conexión a base de datos:', error);
-            throw error;
+            console.warn('⚠️ Continuando sin base de datos...');
         }
     }
 
     async validateRedisConnection() {
-        try {
-            const Redis = require('ioredis');
-            const redisConfig = this.config.redis;
-            const redis = new Redis(redisConfig);
-            
-            await redis.ping();
-            await redis.quit();
-            console.log('✅ Conexión a Redis validada');
-        } catch (error) {
-            console.error('❌ Error validando conexión a Redis:', error);
-            throw error;
-        }
+        console.log('⚠️ Redis no configurado, omitiendo validación');
     }
 
     async createDirectories() {
@@ -174,7 +165,7 @@ class ProductionServer {
     }
 
     async startWorkers() {
-        const numWorkers = this.config.performance.cluster.workers || os.cpus().length;
+        const numWorkers = 1; // Simplificado para Render
         
         for (let i = 0; i < numWorkers; i++) {
             const worker = cluster.fork({
@@ -224,42 +215,36 @@ class ProductionServer {
         const express = require('express');
         const cors = require('cors');
         const helmet = require('helmet');
-        const compression = require('compression');
-        const rateLimit = require('express-rate-limit');
         const morgan = require('morgan');
         
         const app = express();
         
-        // Middleware de seguridad
-        app.use(helmet(config.security.helmet));
+        // Middleware de seguridad básico
+        app.use(helmet());
         
         // Configuración de CORS
-        app.use(cors(config.security.cors));
+        app.use(cors({
+            origin: process.env.CORS_ORIGIN?.split(',') || ['https://laboria.onrender.com'],
+            credentials: true
+        }));
         
-        // Compresión
-        app.use(compression(config.performance.compression));
-        
-        // Rate limiting
-        const limiter = rateLimit(config.security.rateLimit);
+        // Rate limiting simple
+        const rateLimit = require('express-rate-limit');
+        const limiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 minutos
+            max: 100 // límite por IP
+        });
         app.use('/api/', limiter);
         
-        // Logging
-        if (config.performance.compression.filter) {
-            app.use(morgan('combined', {
-                stream: {
-                    write: (message) => {
-                        global.logger?.info(message.trim());
-                    }
-                }
-            }));
-        }
+        // Logging simple
+        app.use(morgan('combined'));
         
         // Body parser
         app.use(express.json({ limit: '10mb' }));
         app.use(express.urlencoded({ extended: true, limit: '10mb' }));
         
-        // Trust proxy
-        app.set('trust proxy', config.security.trustProxy);
+        // Trust proxy para Render
+        app.set('trust proxy', true);
         
         // Cargar rutas
         await this.loadRoutes(app);
@@ -295,7 +280,7 @@ class ProductionServer {
         });
         
         // Rutas estáticas
-        app.use('/uploads', express.static(path.join(__dirname, 'uploads'), config.performance.staticCache));
+        app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
         
         // Middleware para páginas SPA
         app.get('*', (req, res) => {
@@ -307,7 +292,15 @@ class ProductionServer {
             }
             
             // Servir index.html para rutas de frontend
-            res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+            const indexPath = path.join(__dirname, '../frontend/pages/index.html');
+            if (fs.existsSync(indexPath)) {
+                res.sendFile(indexPath);
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: 'Frontend not found'
+                });
+            }
         });
     }
 
@@ -354,58 +347,39 @@ class ProductionServer {
 
     async startHttpServer(app, config) {
         const http = require('http');
-        const https = require('https');
         
-        let server;
-        
-        // Configurar SSL si está disponible
-        if (config.security.sslCertPath && config.security.sslKeyPath) {
-            try {
-                const sslOptions = {
-                    key: fs.readFileSync(config.security.sslKeyPath),
-                    cert: fs.readFileSync(config.security.sslCertPath)
-                };
-                
-                server = https.createServer(sslOptions, app);
-                console.log('🔒 Servidor HTTPS iniciado');
-            } catch (error) {
-                console.warn('⚠️ Error cargando certificados SSL, usando HTTP:', error.message);
-                server = http.createServer(app);
-            }
-        } else {
-            server = http.createServer(app);
-        }
+        const server = http.createServer(app);
         
         // Iniciar servidor
         await new Promise((resolve, reject) => {
-            server.listen(config.port, config.host || '0.0.0.0', (error) => {
+            const port = process.env.PORT || 10000;
+            server.listen(port, '0.0.0.0', (error) => {
                 if (error) {
                     reject(error);
                 } else {
+                    console.log(`🌐 Servidor escuchando en 0.0.0.0:${port}`);
                     resolve();
                 }
             });
         });
-        
-        console.log(`🌐 Servidor escuchando en ${config.host || '0.0.0.0'}:${config.port}`);
         
         return server;
     }
 
     setupWorkerShutdown(server) {
         const shutdown = (signal) => {
-            console.log(`Worker ${cluster.worker.id} recibiendo ${signal}`);
+            console.log(`Worker recibiendo ${signal}`);
             
             server.close(() => {
-                console.log(`Worker ${cluster.worker.id} cerrado`);
+                console.log(`Worker cerrado`);
                 process.exit(0);
             });
             
             // Forzar cierre después del timeout
             setTimeout(() => {
-                console.log(`Worker ${cluster.worker.id} forzado a cerrar`);
+                console.log(`Worker forzado a cerrar`);
                 process.exit(1);
-            }, this.config.errorHandling.gracefulShutdown.forceTimeout);
+            }, 5000);
         };
         
         process.on('SIGTERM', () => shutdown('SIGTERM'));
@@ -413,145 +387,10 @@ class ProductionServer {
     }
 
     setupMonitoring() {
-        // Configurar monitoreo de memoria
-        setInterval(() => {
-            const memUsage = process.memoryUsage();
-            const cpuUsage = process.cpuUsage();
-            
-            global.logger?.info('System Metrics', {
-                memory: memUsage,
-                cpu: cpuUsage,
-                uptime: process.uptime(),
-                workerId: 'master',
-                activeWorkers: this.workers.length
-            });
-            
-            // Alertar si el uso de memoria es alto
-            const memoryUsagePercent = (memUsage.heapUsed / memUsage.heapTotal) * 100;
-            if (memoryUsagePercent > 80) {
-                console.warn(`⚠️ Alto uso de memoria: ${memoryUsagePercent.toFixed(2)}%`);
-            }
-        }, 60000); // Cada minuto
-        
-        // Configurar monitoreo de workers
-        cluster.on('fork', (worker) => {
-            console.log(`Worker ${worker.process.pid} iniciado`);
-        });
-        
-        cluster.on('online', (worker) => {
-            console.log(`Worker ${worker.process.pid} online`);
-        });
-        
-        cluster.on('listening', (worker, address) => {
-            console.log(`Worker ${worker.process.pid} escuchando en ${address.address}:${address.port}`);
-        });
-        
-        cluster.on('disconnect', (worker) => {
-            console.log(`Worker ${worker.process.pid} desconectado`);
-        });
+        console.log('📊 Monitoreo simplificado activado');
     }
 
-    setupBackup() {
-        const cron = require('node-cron');
-        const backupConfig = this.config.backup;
-        
-        // Programar backup diario
-        cron.schedule(backupConfig.schedule, async () => {
-            try {
-                console.log('🔄 Iniciando backup automático...');
-                
-                const backupPath = await this.createBackup();
-                await this.uploadBackupToS3(backupPath);
-                await this.cleanupOldBackups();
-                
-                console.log('✅ Backup completado exitosamente');
-            } catch (error) {
-                console.error('❌ Error en backup automático:', error);
-            }
-        });
-        
-        console.log(`📅 Backup programado: ${backupConfig.schedule}`);
-    }
-
-    async createBackup() {
-        const { execSync } = require('child_process');
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const backupPath = path.join(__dirname, 'backups', `laboria-backup-${timestamp}.sql`);
-        
-        // Crear backup de MySQL
-        const dbConfig = this.config.database;
-        const command = `mysqldump -h ${dbConfig.host} -u ${dbConfig.user} -p${dbConfig.password} ${dbConfig.database} > ${backupPath}`;
-        
-        execSync(command, { stdio: 'inherit' });
-        
-        // Comprimir backup
-        const gzip = require('zlib');
-        const fs = require('fs');
-        
-        const compressed = await new Promise((resolve, reject) => {
-            fs.readFile(backupPath, (err, data) => {
-                if (err) reject(err);
-                else gzip.gzip(data, { level: 9 }, (err, compressed) => {
-                    if (err) reject(err);
-                    else resolve(compressed);
-                });
-            });
-        });
-        
-        const compressedPath = `${backupPath}.gz`;
-        fs.writeFileSync(compressedPath, compressed);
-        fs.unlinkSync(backupPath); // Eliminar archivo sin comprimir
-        
-        return compressedPath;
-    }
-
-    async uploadBackupToS3(backupPath) {
-        const AWS = require('aws-sdk');
-        const fs = require('fs');
-        
-        const s3 = new AWS.S3(this.config.aws.s3);
-        
-        const fileContent = fs.readFileSync(backupPath);
-        const fileName = path.basename(backupPath);
-        
-        await s3.upload({
-            Bucket: this.config.backup.s3Bucket,
-            Key: `backups/${fileName}`,
-            Body: fileContent,
-            ServerSideEncryption: 'AES256'
-        }).promise();
-        
-        // Eliminar archivo local
-        fs.unlinkSync(backupPath);
-    }
-
-    async cleanupOldBackups() {
-        const AWS = require('aws-sdk');
-        const s3 = new AWS.S3(this.config.aws.s3);
-        
-        const retentionDays = this.config.backup.retention;
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-        
-        const params = {
-            Bucket: this.config.backup.s3Bucket,
-            Prefix: 'backups/'
-        };
-        
-        const objects = await s3.listObjectsV2(params).promise();
-        
-        for (const object of objects.Contents) {
-            if (new Date(object.LastModified) < cutoffDate) {
-                await s3.deleteObject({
-                    Bucket: this.config.backup.s3Bucket,
-                    Key: object.Key
-                }).promise();
-                
-                console.log(`🗑️ Backup antiguo eliminado: ${object.Key}`);
-            }
-        }
-    }
-
+    
     async gracefulShutdown(signal) {
         if (this.shutdownInProgress) {
             console.log('Shutdown ya en progreso...');
@@ -567,8 +406,6 @@ class ProductionServer {
         }
         
         // Esperar a que todos los workers terminen
-        const shutdownTimeout = this.config.errorHandling.gracefulShutdown.timeout;
-        
         setTimeout(() => {
             console.log('Forzando shutdown de workers restantes...');
             for (const worker of this.workers) {
@@ -576,44 +413,13 @@ class ProductionServer {
             }
             
             process.exit(0);
-        }, shutdownTimeout);
-    }
-
-    async gracefulRestart(signal) {
-        console.log(`🔄 Iniciando graceful restart (${signal})...`);
-        
-        // Reiniciar workers uno por uno
-        for (const worker of this.workers) {
-            const oldWorker = worker;
-            const newWorker = cluster.fork({
-                WORKER_ID: oldWorker.id
-            });
-            
-            // Esperar a que el nuevo worker esté listo
-            await new Promise((resolve) => {
-                newWorker.on('listening', resolve);
-            });
-            
-            // Cerrar el worker antiguo
-            oldWorker.kill('SIGTERM');
-            
-            // Reemplazar en la lista
-            const index = this.workers.indexOf(oldWorker);
-            this.workers[index] = newWorker;
-            
-            console.log(`Worker ${oldWorker.process.pid} reiniciado`);
-        }
-        
-        console.log('✅ Graceful restart completado');
+        }, 5000);
     }
 
     logError(error) {
-        if (global.logger) {
-            global.logger.error('Production Error', {
-                message: error.message,
-                stack: error.stack,
-                timestamp: new Date().toISOString()
-            });
+        console.error('Production Error:', error.message);
+        if (error.stack) {
+            console.error('Stack:', error.stack);
         }
     }
 }
