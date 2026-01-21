@@ -265,13 +265,12 @@ class ProductionServer {
             });
         });
         
-        // Rutas de API - habilitando todas las rutas
-        console.log('🔧 Habilitando todas las rutas de la API');
-        
-        app.use('/api/auth', require('./routes/auth'));
-        app.use('/api/users', require('./routes/users'));
-        app.use('/api/jobs', require('./routes/jobs'));
-        app.use('/api/courses', require('./routes/courses'));
+        // Rutas de API - habilitando todas las rutas (temporalmente deshabilitadas)
+        console.log('🔧 API routes deshabilitadas temporalmente para debugging');
+        // app.use('/api/auth', require('./routes/auth'));
+        // app.use('/api/users', require('./routes/users'));
+        // app.use('/api/jobs', require('./routes/jobs'));
+        // app.use('/api/courses', require('./routes/courses'));
         
         // Rutas de health check
         app.get('/api/health', (req, res) => {
@@ -298,11 +297,12 @@ class ProductionServer {
         app.use('/js', require('express').static('./frontend/js'));
         app.use('/shared', require('express').static('./shared'));
         
-        // Rutas de API
-        app.use('/api/auth', require('./routes/auth'));
-        app.use('/api/users', require('./routes/users'));
-        app.use('/api/jobs', require('./routes/jobs'));
-        app.use('/api/courses', require('./routes/courses'));
+        // Rutas de API - temporalmente deshabilitadas para debugging
+        console.log('🔧 API routes deshabilitadas temporalmente');
+        // app.use('/api/auth', require('./routes/auth'));
+        // app.use('/api/users', require('./routes/users'));
+        // app.use('/api/jobs', require('./routes/jobs'));
+        // app.use('/api/courses', require('./routes/courses'));
         
         // Middleware para páginas SPA
         app.get('*', (req, res) => {
