@@ -265,13 +265,13 @@ class ProductionServer {
             });
         });
         
-        // Rutas de API - habilitando progresivamente para debugging
-        console.log('🔧 Habilitando rutas originales progresivamente');
+        // Rutas de API - habilitando todas las rutas
+        console.log('🔧 Habilitando todas las rutas de la API');
         
         app.use('/api/auth', require('./routes/auth'));
-        // app.use('/api/users', require('./routes/users'));
-        // app.use('/api/jobs', require('./routes/jobs'));
-        // app.use('/api/courses', require('./routes/courses'));
+        app.use('/api/users', require('./routes/users'));
+        app.use('/api/jobs', require('./routes/jobs'));
+        app.use('/api/courses', require('./routes/courses'));
         
         // Rutas de health check
         app.get('/api/health', (req, res) => {
@@ -302,22 +302,29 @@ class ProductionServer {
                 });
             }
             
-            // Servir página de bienvenida simple
-            res.send(`
-                <html>
-                    <head><title>Laboria - Servidor Funcionando</title></head>
-                    <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
-                        <h1>🚀 Laboria Server</h1>
-                        <p>✅ Servidor funcionando correctamente</p>
-                        <p>🔍 Health Check: <a href="/health">/health</a></p>
-                        <p>🔍 API Health: <a href="/api/health">/api/health</a></p>
-                        <p>📊 Environment: ${process.env.NODE_ENV}</p>
-                        <p>🌐 Port: ${process.env.PORT || 10000}</p>
-                        <p>🕒 Deploy: ${new Date().toISOString()}</p>
-                        <p>🔧 Auth Routes: Enabled</p>
-                    </body>
-                </html>
-            `);
+            // Servir el frontend real
+            const indexPath = '../frontend/pages/index.html';
+            if (fs.existsSync(indexPath)) {
+                res.sendFile(indexPath);
+            } else {
+                // Si no existe el frontend, servir página de bienvenida
+                res.send(`
+                    <html>
+                        <head><title>Laboria - Servidor Funcionando</title></head>
+                        <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
+                            <h1>🚀 Laboria Server</h1>
+                            <p>✅ Servidor funcionando correctamente</p>
+                            <p>🔍 Health Check: <a href="/health">/health</a></p>
+                            <p>🔍 API Health: <a href="/api/health">/api/health</a></p>
+                            <p>📊 Environment: ${process.env.NODE_ENV}</p>
+                            <p>🌐 Port: ${process.env.PORT || 10000}</p>
+                            <p>🕒 Deploy: ${new Date().toISOString()}</p>
+                            <p>🔧 Auth Routes: Enabled</p>
+                            <p>⚠️ Frontend no encontrado en: ${indexPath}</p>
+                        </body>
+                    </html>
+                `);
+            }
         });
     }
 
