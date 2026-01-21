@@ -316,6 +316,9 @@ class ProductionServer {
             // Servir el frontend real
             const indexPath = './frontend/pages/index.html';
             console.log('🔍 Sirviendo frontend desde:', indexPath);
+            console.log('📁 Existe archivo:', fs.existsSync(indexPath));
+            console.log('📂 Directorio actual:', process.cwd());
+            console.log('📋 Lista archivos frontend/pages:', fs.readdirSync('./frontend/pages'));
             
             if (fs.existsSync(indexPath)) {
                 res.sendFile(indexPath);
