@@ -293,10 +293,10 @@ class ProductionServer {
         // Rutas estáticas
         app.use('/uploads', require('express').static('./uploads'));
         
-        // Servir recursos estáticos del frontend
-        app.use('/styles', require('express').static('../frontend/styles'));
-        app.use('/js', require('express').static('../frontend/js'));
-        app.use('/shared', require('express').static('../shared'));
+        // Servir recursos estáticos del frontend (locales)
+        app.use('/styles', require('express').static('./frontend/styles'));
+        app.use('/js', require('express').static('./frontend/js'));
+        app.use('/shared', require('express').static('./shared'));
         
         // Rutas de API
         app.use('/api/auth', require('./routes/auth'));
@@ -314,9 +314,8 @@ class ProductionServer {
             }
             
             // Servir el frontend real
-            const indexPath = path.join(__dirname, '../frontend/pages/index.html');
-            console.log('🔍 Buscando frontend en:', indexPath);
-            console.log('📁 Existe:', fs.existsSync(indexPath));
+            const indexPath = './frontend/pages/index.html';
+            console.log('🔍 Sirviendo frontend desde:', indexPath);
             
             if (fs.existsSync(indexPath)) {
                 res.sendFile(indexPath);
