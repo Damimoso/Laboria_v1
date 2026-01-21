@@ -29,7 +29,7 @@ const BACKEND_CONFIG = {
         BACKEND: path.resolve(__dirname, '..'),
         FRONTEND: path.resolve(__dirname, '../../frontend'),
         SHARED: path.resolve(__dirname, '../../shared'),
-        UPLOADS: path.resolve(__dirname, '../uploads'),
+        UPLOADS: './uploads',
         LOGS: path.resolve(__dirname, '../logs'),
         TEMP: path.resolve(__dirname, '../temp')
     },
@@ -46,7 +46,7 @@ const BACKEND_CONFIG = {
     STATIC: {
         SERVE_FRONTEND: true,
         FRONTEND_PATH: path.resolve(__dirname, '../../frontend'),
-        UPLOAD_PATH: path.resolve(__dirname, '../uploads'),
+        UPLOAD_PATH: './uploads',
         MAX_AGE: process.env.NODE_ENV === 'production' ? '1y' : '0'
     },
     
@@ -84,7 +84,7 @@ const BACKEND_CONFIG = {
             'application/msword',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         ],
-        DESTINATION: path.resolve(__dirname, '../uploads'),
+        DESTINATION: './uploads',
         FILENAME: (req, file, cb) => {
             const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
             cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));

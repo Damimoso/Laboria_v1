@@ -205,7 +205,7 @@ router.post('/upload-avatar',
     authenticateToken,
     requireActiveAccount,
     require('multer')({ 
-        dest: helpers.getPath('uploads'),
+        dest: './uploads',
         limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
         fileFilter: (req, file, cb) => {
             const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
