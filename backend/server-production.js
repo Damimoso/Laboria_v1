@@ -313,6 +313,8 @@ class ProductionServer {
                         <p>🔍 API Health: <a href="/api/health">/api/health</a></p>
                         <p>📊 Environment: ${process.env.NODE_ENV}</p>
                         <p>🌐 Port: ${process.env.PORT || 10000}</p>
+                        <p>🕒 Deploy: ${new Date().toISOString()}</p>
+                        <p>🔧 Auth Routes: Enabled</p>
                     </body>
                 </html>
             `);
