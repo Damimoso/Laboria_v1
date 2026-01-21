@@ -345,29 +345,9 @@ class ProductionServer {
     }
 
     setupErrorMiddleware(app) {
-        // Error 404
-        app.use('*', (req, res) => {
-            res.status(404).json({
-                success: false,
-                message: 'Endpoint not found',
-                path: req.originalUrl
-            });
-        });
-        
-        // Error handler
+        // Error handler (debe ir antes del 404)
         app.use((error, req, res, next) => {
             console.error('Error del servidor:', error);
-            
-            // Logging del error
-            global.logger?.error('Server Error', {
-                error: error.message,
-                stack: error.stack,
-                url: req.url,
-                method: req.method,
-                ip: req.ip,
-                userAgent: req.get('User-Agent'),
-                workerId: process.env.WORKER_ID
-            });
             
             // En producción no enviar stack traces
             const response = {
@@ -382,6 +362,21 @@ class ProductionServer {
             }
             
             res.status(error.status || 500).json(response);
+        });
+        
+        // Error 404 (debe ir al final)
+        app.use('*', (req, res) => {
+            // Si es una solicitud de API, responder con JSON
+            if (req.path.startsWith('/api/')) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'API endpoint not found',
+                    path: req.originalUrl
+                });
+            }
+            
+            // Si es un archivo estático que no se encontró, dejar pasar al siguiente middleware
+            next();
         });
     }
 
