@@ -280,7 +280,7 @@ class ProductionServer {
         });
         
         // Rutas estáticas
-        app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+        app.use('/uploads', require('express').static(path.join(__dirname, 'uploads')));
         
         // Middleware para páginas SPA
         app.get('*', (req, res) => {
