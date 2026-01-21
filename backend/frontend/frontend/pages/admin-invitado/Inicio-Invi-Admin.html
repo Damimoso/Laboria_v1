@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboria Admin - Panel Principal</title>
+    
+    <!-- Scripts compartidos (orden optimizado) -->
+    <script src="../../shared/constants.js"></script>
+    <script src="../../js/api-client.js"></script>
+    <script src="../../shared/ui-system.js"></script>
+    <script src="../../shared/notification-system.js"></script>
+    <script src="../../shared/navigation-system.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Estilos CSS Unificados -->
+    <link rel="stylesheet" href="../../styles/styles.css">
+    <link rel="stylesheet" href="../../styles/accessibility-ux.css">
+    <script src="../../styles/theme-switcher.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos específicos para Admin Invitado */
+        .admin-container {
+            background: var(--theme-gradient);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .admin-header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--theme-primary);
+        }
+        
+        .admin-brand i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 50px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .admin-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .admin-name {
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            font-size: 0.9rem;
+        }
+        
+        .admin-role {
+            font-size: 0.8rem;
+            color: var(--theme-text-secondary);
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .admin-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .admin-btn-primary {
+            background: var(--theme-primary);
+            color: white;
+        }
+        
+        .admin-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .admin-btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--theme-text-primary);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-btn-secondary:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: var(--theme-primary);
+        }
+        
+        .admin-sidebar {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 280px;
+            height: calc(100vh - 80px);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            z-index: 999;
+        }
+        
+        .sidebar-section {
+            padding: 1.5rem;
+        }
+        
+        .sidebar-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--theme-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--theme-text-primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--theme-primary);
+            transform: translateX(4px);
+        }
+        
+        .sidebar-item.active {
+            background: var(--theme-primary);
+            color: white;
+        }
+        
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .admin-main {
+            margin-left: 280px;
+            padding: 2rem;
+            max-width: calc(100vw - 280px);
+        }
+        
+        .admin-welcome {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .welcome-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+        
+        .welcome-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--theme-text-primary);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+        
+        .welcome-content p {
+            color: var(--theme-text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .welcome-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .welcome-stat {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        .welcome-stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--theme-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .welcome-stat-label {
+            color: var(--theme-text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .admin-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+        }
+        
+        .admin-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .admin-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+            color: white;
+        }
+        
+        .admin-card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--theme-text-primary);
+        }
+        
+        .admin-card-description {
+            color: var(--theme-text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .admin-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-card-stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .admin-card-stat {
+            text-align: center;
+        }
+        
+        .admin-card-stat-number {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--theme-primary);
+        }
+        
+        .admin-card-stat-label {
+            font-size: 0.8rem;
+            color: var(--theme-text-secondary);
+        }
+        
+        .admin-card-action {
+            padding: 0.5rem 1rem;
+            background: var(--theme-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-card-action:hover {
+            background: var(--theme-secondary);
+            transform: translateY(-2px);
+        }
+        
+        .admin-activity {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .activity-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--theme-text-primary);
+        }
+        
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .activity-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(4px);
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--theme-primary);
+            color: white;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .activity-description {
+            color: var(--theme-text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .activity-time {
+            color: var(--theme-text-secondary);
+            font-size: 0.8rem;
+        }
+        
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--theme-primary);
+            cursor: pointer;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .admin-main {
+                margin-left: 240px;
+                max-width: calc(100vw - 240px);
+            }
+            
+            .admin-sidebar {
+                width: 240px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .admin-main {
+                margin-left: 0;
+                max-width: 100%;
+            }
+            
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .admin-nav {
+                padding: 1rem;
+            }
+            
+            .admin-brand {
+                font-size: 1.2rem;
+            }
+            
+            .admin-info {
+                display: none;
+            }
+            
+            .welcome-content h1 {
+                font-size: 2rem;
+            }
+            
+            .welcome-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .admin-card {
+                padding: 1.5rem;
+            }
+            
+            .admin-card-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="admin-container">
+    <!-- Header Admin -->
+    <header class="admin-header">
+        <nav class="admin-nav">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="admin-brand">
+                    <img id="adminInvitadoLogo" src="../../assets/logo-blanco.png" alt="Laboria" style="width: 32px; height: 32px; object-fit: contain;">
+                    <span>Laboria Admin</span>
+                </div>
+            </div>
+            
+            <div class="admin-user">
+                <div class="admin-info">
+                    <div class="admin-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="admin-details">
+                        <div class="admin-name" id="adminName">Admin Invitado</div>
+                        <div class="admin-role">Administrador</div>
+                    </div>
+                </div>
+                
+                <div class="admin-actions">
+                    <button class="admin-btn admin-btn-secondary" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span>Notificaciones</span>
+                    </button>
+                    <button class="admin-btn admin-btn-primary" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Salir</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Principal</h3>
+            <div class="sidebar-menu">
+                <a href="#" class="sidebar-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Estadísticas</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-bell"></i>
+                    <span>Notificaciones</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Gestión</h3>
+            <div class="sidebar-menu">
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-users"></i>
+                    <span>Usuarios</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Empleos</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Cursos</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Aplicaciones</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Herramientas</h3>
+            <div class="sidebar-menu">
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reportes</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Ajustes</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Ayuda</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Welcome Section -->
+        <section class="admin-welcome">
+            <div class="welcome-header">
+                <div class="welcome-content">
+                    <h1>Bienvenido, Administrador</h1>
+                    <p>Gestiona contenido y usuarios con acceso limitado. Tienes permisos para administrar empleos, cursos y ver estadísticas básicas.</p>
+                </div>
+            </div>
+            
+            <div class="welcome-stats">
+                <div class="welcome-stat">
+                    <div class="welcome-stat-number" id="totalUsers">0</div>
+                    <div class="welcome-stat-label">Usuarios Totales</div>
+                </div>
+                <div class="welcome-stat">
+                    <div class="welcome-stat-number" id="activeJobs">0</div>
+                    <div class="welcome-stat-label">Empleos Activos</div>
+                </div>
+                <div class="welcome-stat">
+                    <div class="welcome-stat-number" id="activeCourses">0</div>
+                    <div class="welcome-stat-label">Cursos Activos</div>
+                </div>
+                <div class="welcome-stat">
+                    <div class="welcome-stat-number" id="totalApplications">0</div>
+                    <div class="welcome-stat-label">Aplicaciones</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Admin Grid -->
+        <div class="admin-grid">
+            <!-- Empleos Card -->
+            <div class="admin-card" onclick="navigateToJobs()">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3 class="admin-card-title">Gestión de Empleos</h3>
+                </div>
+                <p class="admin-card-description">
+                    Publica, edita y gestiona todas las ofertas de empleo disponibles en la plataforma.
+                </p>
+                <div class="admin-card-footer">
+                    <div class="admin-card-stats">
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">156</div>
+                            <div class="admin-card-stat-label">Total</div>
+                        </div>
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">145</div>
+                            <div class="admin-card-stat-label">Activos</div>
+                        </div>
+                    </div>
+                    <button class="admin-card-action">
+                        Gestionar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Cursos Card -->
+            <div class="admin-card" onclick="navigateToCourses()">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="admin-card-title">Gestión de Cursos</h3>
+                </div>
+                <p class="admin-card-description">
+                    Administra el catálogo de cursos, instructores y seguimiento del progreso de los estudiantes.
+                </p>
+                <div class="admin-card-footer">
+                    <div class="admin-card-stats">
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">89</div>
+                            <div class="admin-card-stat-label">Total</div>
+                        </div>
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">78</div>
+                            <div class="admin-card-stat-label">Activos</div>
+                        </div>
+                    </div>
+                    <button class="admin-card-action">
+                        Gestionar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Usuarios Card -->
+            <div class="admin-card" onclick="navigateToUsers()">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="admin-card-title">Ver Usuarios</h3>
+                </div>
+                <p class="admin-card-description">
+                    Consulta la lista de usuarios y sus perfiles. Acceso de solo lectura para administradores invitados.
+                </p>
+                <div class="admin-card-footer">
+                    <div class="admin-card-stats">
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">1,247</div>
+                            <div class="admin-card-stat-label">Total</div>
+                        </div>
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">892</div>
+                            <div class="admin-card-stat-label">Activos</div>
+                        </div>
+                    </div>
+                    <button class="admin-card-action">
+                        Ver Lista
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Reportes Card -->
+            <div class="admin-card" onclick="navigateToReports()">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="admin-card-title">Reportes Básicos</h3>
+                </div>
+                <p class="admin-card-description">
+                    Visualiza estadísticas básicas del sistema y reportes de actividad con acceso limitado.
+                </p>
+                <div class="admin-card-footer">
+                    <div class="admin-card-stats">
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">12</div>
+                            <div class="admin-card-stat-label">Reportes</div>
+                        </div>
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">156</div>
+                            <div class="admin-card-stat-label">Métricas</div>
+                        </div>
+                    </div>
+                    <button class="admin-card-action">
+                        Ver Reportes
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Aplicaciones Card -->
+            <div class="admin-card" onclick="navigateToApplications()">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3 class="admin-card-title">Aplicaciones</h3>
+                </div>
+                <p class="admin-card-description">
+                    Revisa las aplicaciones a empleos y gestiona el estado de las solicitudes recibidas.
+                </p>
+                <div class="admin-card-footer">
+                    <div class="admin-card-stats">
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">234</div>
+                            <div class="admin-card-stat-label">Total</div>
+                        </div>
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">45</div>
+                            <div class="admin-card-stat-label">Pendientes</div>
+                        </div>
+                    </div>
+                    <button class="admin-card-action">
+                        Revisar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Ajustes Card -->
+            <div class="admin-card" onclick="navigateToSettings()">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h3 class="admin-card-title">Ajustes Básicos</h3>
+                </div>
+                <p class="admin-card-description">
+                    Configura ajustes básicos del sistema con permisos limitados para administradores invitados.
+                </p>
+                <div class="admin-card-footer">
+                    <div class="admin-card-stats">
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">8</div>
+                            <div class="admin-card-stat-label">Opciones</div>
+                        </div>
+                        <div class="admin-card-stat">
+                            <div class="admin-card-stat-number">5</div>
+                            <div class="admin-card-stat-label">Activas</div>
+                        </div>
+                    </div>
+                    <button class="admin-card-action">
+                        Configurar
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity Section -->
+        <section class="admin-activity">
+            <div class="activity-header">
+                <h3 class="activity-title">Actividad Reciente</h3>
+                <button class="admin-btn admin-btn-secondary">
+                    <i class="fas fa-refresh"></i>
+                    <span>Actualizar</span>
+                </button>
+            </div>
+            
+            <div class="activity-list" id="activityList">
+                <!-- Activity items will be loaded dynamically -->
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        // Variables globales
+        let dashboardData = {
+            stats: null,
+            activity: []
+        };
+        
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Inicializando Panel Admin Invitado...');
+            
+            setTimeout(async () => {
+                // Verificar autenticación y rol
+                if (!window.LaboriaAPI?.isAuthenticated()) {
+                    window.location.href = '../pages/index.html';
+                    return;
+                }
+                
+                const user = window.LaboriaAPI.usuarioActual;
+                if (!user || user.rol !== 'admin_invitado') {
+                    console.log('❌ Usuario no es Admin Invitado, redirigiendo...');
+                    window.location.href = '../pages/index.html';
+                    return;
+                }
+                
+                // Cargar información del usuario
+                loadUserInfo();
+                
+                // Cargar datos del dashboard
+                await loadDashboardData();
+                renderDashboard();
+                
+                console.log('✅ Panel Admin Invitado inicializado correctamente');
+            }, 500);
+        });
+        
+        // Cargar información del usuario
+        function loadUserInfo() {
+            const user = window.LaboriaAPI.usuarioActual;
+            if (user) {
+                document.getElementById('adminName').textContent = user.nombre || 'Admin Invitado';
+            }
+        }
+        
+        // Cargar datos del dashboard
+        async function loadDashboardData() {
+            try {
+                // Cargar estadísticas reales del backend
+                const statsResponse = await window.LaboriaAPI.getDashboardStats();
+                dashboardData.stats = statsResponse.data;
+                
+                // Cargar actividad reciente
+                const activityResponse = await window.LaboriaAPI.getDashboardActivity();
+                dashboardData.activity = activityResponse.data;
+                
+            } catch (error) {
+                console.error('❌ Error cargando datos del dashboard:', error);
+                // Usar datos simulados como fallback
+                dashboardData.stats = {
+                    usuarios: { total: 1247, activos: 892, nuevos: 23 },
+                    empleos: { total: 156, activos: 145, nuevos: 8 },
+                    cursos: { total: 89, activos: 78, nuevos: 5 },
+                    aplicaciones: { total: 156, esta_semana: 23, tasa_exito: 0.67 }
+                };
+                dashboardData.activity = [
+                    { tipo: 'usuario_registro', descripcion: 'Nuevo usuario registrado', usuario: 'María González', timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), icon: 'user-plus' },
+                    { tipo: 'empleo_publicado', descripcion: 'Nuevo empleo publicado', detalles: 'Desarrollador Full Stack en TechCorp', timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), icon: 'briefcase' },
+                    { tipo: 'curso_completado', descripcion: 'Curso completado', detalles: 'React.js Avanzado por 25 usuarios', timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), icon: 'graduation-cap' }
+                ];
+            }
+        }
+        
+        // Renderizar dashboard
+        function renderDashboard() {
+            renderStats();
+            renderActivity();
+        }
+        
+        // Renderizar estadísticas
+        function renderStats() {
+            const stats = dashboardData.stats;
+            if (stats) {
+                document.getElementById('totalUsers').textContent = stats.usuarios?.total || 0;
+                document.getElementById('activeJobs').textContent = stats.empleos?.activos || 0;
+                document.getElementById('activeCourses').textContent = stats.cursos?.activos || 0;
+                document.getElementById('totalApplications').textContent = stats.aplicaciones?.total || 0;
+            }
+        }
+        
+        // Renderizar actividad
+        function renderActivity() {
+            const activityList = document.getElementById('activityList');
+            const activities = dashboardData.activity;
+            
+            if (!activities || activities.length === 0) {
+                activityList.innerHTML = '<p style="text-align: center; color: var(--theme-text-secondary);">No hay actividad reciente</p>';
+                return;
+            }
+            
+            activityList.innerHTML = activities.map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-${activity.icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.descripcion}</div>
+                        <div class="activity-description">${activity.detalles || activity.usuario || ''}</div>
+                    </div>
+                    <div class="activity-time">${formatTime(activity.timestamp)}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Formatear tiempo
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Ahora';
+            if (diffMins < 60) return `Hace ${diffMins} min`;
+            if (diffMins < 1440) return `Hace ${Math.floor(diffMins / 60)} h`;
+            return `Hace ${Math.floor(diffMins / 1440)} días`;
+        }
+        
+        // Funciones de navegación
+        function navigateToUsers() {
+            window.LaboriaAPI.showNotification('Navegando a lista de usuarios...', 'info');
+            setTimeout(() => {
+                window.LaboriaAPI.showNotification('Módulo de usuarios (solo lectura) en desarrollo', 'info');
+            }, 1000);
+        }
+        
+        function navigateToJobs() {
+            window.LaboriaAPI.showNotification('Navegando a gestión de empleos...', 'info');
+            setTimeout(() => {
+                window.LaboriaAPI.showNotification('Módulo de empleos en desarrollo', 'info');
+            }, 1000);
+        }
+        
+        function navigateToCourses() {
+            window.LaboriaAPI.showNotification('Navegando a gestión de cursos...', 'info');
+            setTimeout(() => {
+                window.LaboriaAPI.showNotification('Módulo de cursos en desarrollo', 'info');
+            }, 1000);
+        }
+        
+        function navigateToApplications() {
+            window.LaboriaAPI.showNotification('Navegando a aplicaciones...', 'info');
+            setTimeout(() => {
+                window.LaboriaAPI.showNotification('Módulo de aplicaciones en desarrollo', 'info');
+            }, 1000);
+        }
+        
+        function navigateToReports() {
+            window.LaboriaAPI.showNotification('Navegando a reportes básicos...', 'info');
+            setTimeout(() => {
+                window.LaboriaAPI.showNotification('Módulo de reportes en desarrollo', 'info');
+            }, 1000);
+        }
+        
+        function navigateToSettings() {
+            window.LaboriaAPI.showNotification('Navegando a ajustes básicos...', 'info');
+            setTimeout(() => {
+                window.LaboriaAPI.showNotification('Módulo de ajustes en desarrollo', 'info');
+            }, 1000);
+        }
+        
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            sidebar.classList.toggle('open');
+        }
+        
+        // Toggle notifications
+        function toggleNotifications() {
+            window.LaboriaAPI.showNotification('Centro de notificaciones en desarrollo', 'info');
+        }
+        
+        // Event Listeners
+    </script>
+</body>
+</html>

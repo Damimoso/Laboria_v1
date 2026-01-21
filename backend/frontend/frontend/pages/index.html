@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboria - Portal de Empleo y Cursos</title>
+    
+    <!-- Scripts compartidos (orden optimizado) -->
+    <script src="../shared/constants-production.js"></script>
+    <script src="../js/api-client.js"></script>
+    <script src="../shared/ui-system.js"></script>
+    <script src="../shared/notification-system.js"></script>
+    <script src="../shared/navigation-system.js"></script>
+    
+    <!-- Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Estilos CSS Unificados -->
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../styles/accessibility-ux.css">
+    
+    <!-- Theme Switcher -->
+    <script src="../styles/theme-switcher.js"></script>
+    <script src="../styles/landing-page-optimized.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Meta tags para SEO -->
+    <meta name="description" content="Plataforma integral de empleo y formación profesional">
+    <meta name="keywords" content="empleos, trabajo, cursos, desarrollo profesional, Laboria">
+    <meta name="author" content="Laboria Team">
+    
+    <!-- Open Graph para redes sociales -->
+    <meta property="og:title" content="Laboria - Portal de Empleo y Cursos">
+    <meta property="og:description" content="Plataforma integral de empleo y formación profesional">
+    <meta property="og:type" content="website">
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
+        font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net;
+        img-src 'self' data: https:;
+        connect-src 'self' http://localhost:3000 http://127.0.0.1:3000 http://localhost:5500 http://127.0.0.1:5500 https://cdn.jsdelivr.net ws://localhost:3000 ws://127.0.0.1:3000 ws://localhost:5500 ws://127.0.0.1:5500;
+        frame-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
+    
+    <style>
+        /* Estilos base comunes */
+        :root {
+            --theme-primary: #667eea;
+            --theme-secondary: #764ba2;
+            --theme-accent: #f093fb;
+            --theme-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --theme-text-primary: #2d3748;
+            --theme-text-secondary: #718096;
+            --theme-bg-primary: #ffffff;
+            --theme-bg-secondary: #f7fafc;
+            --theme-border: #e2e8f0;
+            --theme-success: #48bb78;
+            --theme-warning: #ed8936;
+            --theme-error: #f56565;
+            --theme-info: #4299e1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--theme-gradient);
+            min-height: 100vh;
+            color: var(--theme-text-primary);
+            line-height: 1.6;
+        }
+        
+        /* Container base */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Skip link para accesibilidad */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: -40px;
+            background: var(--theme-primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 50%;
+            text-decoration: none;
+            font-weight: 600;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .skip-link:focus {
+            top: 10px;
+            left: 10px;
+        }
+        
+        /* Main container */
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Screens */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .screen.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Animated backgrounds */
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: -1;
+        }
+        
+        .admin-bg {
+            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+        }
+        
+        /* Floating shapes */
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .shape-1 {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .shape-2 {
+            width: 60px;
+            height: 60px;
+            top: 20%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+        
+        .shape-3 {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+        
+        .shape-4 {
+            width: 40px;
+            height: 40px;
+            top: 60%;
+            right: 25%;
+            animation-delay: 1s;
+        }
+        
+        .shape-5 {
+            width: 70px;
+            height: 70px;
+            bottom: 30%;
+            right: 10%;
+            animation-delay: 3s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(20px) rotate(240deg); }
+        }
+        
+        /* Login container */
+        .centered-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        /* Login card */
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .modern-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .admin-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Logo section */
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .animated-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .logo-image img {
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo-image img:hover {
+            transform: scale(1.05);
+        }
+        
+        .tagline {
+            color: var(--theme-text-secondary);
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .logo-icon {
+            font-size: 3rem;
+            background: var(--theme-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+        
+        /* Forms */
+        .modern-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .modern-group {
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--theme-text-primary);
+        }
+        
+        .form-input-wrapper {
+            position: relative;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--theme-border);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--theme-primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-input-with-icon {
+            padding-left: 3rem;
+        }
+        
+        .form-input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--theme-text-secondary);
+            font-size: 1rem;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--theme-text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        /* Form options */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .checkbox-wrapper input[type="checkbox"] {
+            margin: 0;
+        }
+        
+        .checkmark {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--theme-border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .checkbox-wrapper input[type="checkbox"]:checked + .checkmark {
+            background: var(--theme-primary);
+            border-color: var(--theme-primary);
+        }
+        
+        .checkbox-wrapper input[type="checkbox"]:checked + .checkmark::after {
+            content: '✓';
+            color: white;
+            font-size: 0.8rem;
+        }
+        
+        .forgot-link {
+            color: var(--theme-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .forgot-link:hover {
+            color: var(--theme-secondary);
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 1rem;
+            background: var(--theme-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .modern-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--theme-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .modern-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .modern-btn:hover::before {
+            left: 100%;
+        }
+        
+        .modern-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-admin-access {
+            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .btn-admin-access:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(118, 75, 162, 0.3);
+        }
+        
+        /* Footer */
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .register-link {
+            color: var(--theme-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .register-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-card {
+                margin: 1rem;
+                padding: 2rem;
+            }
+            
+            .shape {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip link para accesibilidad -->
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+    
+    <div class="main-container" id="main-content">
+        <!-- Pantalla de Login de Usuarios -->
+        <div id="userLoginScreen" class="screen active">
+            <div class="animated-bg">
+                <div class="floating-shapes">
+                    <div class="shape shape-1"></div>
+                    <div class="shape shape-2"></div>
+                    <div class="shape shape-3"></div>
+                    <div class="shape shape-4"></div>
+                    <div class="shape shape-5"></div>
+                </div>
+            </div>
+            <div class="centered-container">
+                <div class="login-card modern-card">
+                    <div class="logo animated-logo">
+                        <div class="logo-image">
+                            <img id="themeLogo" src="../assets/logo-blanco-vertical.png" alt="Laboria Logo" style="width: 240px; height: 360px; object-fit: contain;">
+                        </div>
+                        <p class="tagline">🚀 Tu futuro profesional empieza aquí</p>
+                    </div>
+                    
+                    <form id="userLoginForm" class="modern-form">
+                        <div class="form-group modern-group">
+                            <label for="userEmail">Email</label>
+                            <div class="form-input-wrapper">
+                                <i class="fas fa-envelope form-input-icon"></i>
+                                <input type="email" id="userEmail" class="form-input form-input-with-icon" placeholder="tu@email.com" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group modern-group">
+                            <label for="userPassword">Contraseña</label>
+                            <div class="form-input-wrapper">
+                                <i class="fas fa-lock form-input-icon"></i>
+                                <input type="password" id="userPassword" class="form-input form-input-with-icon" placeholder="Mínimo 8 caracteres" required>
+                                <button type="button" class="toggle-password" data-target="userPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-options">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" id="userRememberMe">
+                                <span class="checkmark"></span>
+                                Recordarme
+                            </label>
+                            <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary modern-btn">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </button>
+                    </form>
+                    
+                    <div class="login-footer">
+                        <p>¿No tienes cuenta? <a href="#" class="register-link" onclick="showRegisterForm()">Crear cuenta</a></p>
+                    </div>
+                    
+                    <!-- Botón para ir al login de administradores -->
+                    <div class="admin-access">
+                        <button id="goToAdminLogin" class="btn-admin-access">
+                            <i class="fas fa-shield-alt"></i> Panel Administrador
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Login de Administradores -->
+        <div id="adminLoginScreen" class="screen">
+            <div class="animated-bg admin-bg">
+                <div class="floating-shapes">
+                    <div class="shape shape-1"></div>
+                    <div class="shape shape-2"></div>
+                    <div class="shape shape-3"></div>
+                    <div class="shape shape-4"></div>
+                    <div class="shape shape-5"></div>
+                </div>
+            </div>
+            <div class="centered-container">
+                <div class="login-card modern-card admin-card">
+                    <div class="logo animated-logo">
+                        <div class="logo-icon admin-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h1>Laboria Admin</h1>
+                        <p class="tagline">🛡️ Aquí empieza el mantenimiento</p>
+                    </div>
+                    
+                    <form id="adminLoginForm" class="modern-form">
+                        <div class="form-group modern-group">
+                            <label for="adminEmail">Email Administrador</label>
+                            <div class="form-input-wrapper">
+                                <i class="fas fa-user-shield form-input-icon"></i>
+                                <input type="email" id="adminEmail" class="form-input form-input-with-icon" placeholder="admin@laboria.com" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group modern-group">
+                            <label for="adminPassword">Contraseña</label>
+                            <div class="form-input-wrapper">
+                                <i class="fas fa-lock form-input-icon"></i>
+                                <input type="password" id="adminPassword" class="form-input form-input-with-icon" placeholder="Mínimo 8 caracteres" required>
+                                <button type="button" class="toggle-password" data-target="adminPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary modern-btn">
+                            <i class="fas fa-shield-alt"></i> Acceder como Administrador
+                        </button>
+                    </form>
+                    
+                    <div class="login-footer">
+                        <button id="goToUserLogin" class="btn-admin-access">
+                            <i class="fas fa-user"></i> Volver a Login Usuario
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Variables globales
+        let currentScreen = 'user';
+        
+        // Función para cambiar entre pantallas
+        function switchScreen(screen) {
+            const userScreen = document.getElementById('userLoginScreen');
+            const adminScreen = document.getElementById('adminLoginScreen');
+            
+            if (screen === 'user') {
+                userScreen.classList.add('active');
+                adminScreen.classList.remove('active');
+            } else {
+                userScreen.classList.remove('active');
+                adminScreen.classList.add('active');
+            }
+            
+            currentScreen = screen;
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Botón para ir al login de administradores
+            document.getElementById('goToAdminLogin').addEventListener('click', function() {
+                switchScreen('admin');
+            });
+            
+            // Botón para volver al login de usuarios
+            document.getElementById('goToUserLogin').addEventListener('click', function() {
+                switchScreen('user');
+            });
+            
+            // Toggle password visibility
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const passwordInput = document.getElementById(targetId);
+                    const icon = this.querySelector('i');
+                    
+                    if (passwordInput && icon) {
+                        if (passwordInput.type === 'password') {
+                            passwordInput.type = 'text';
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            passwordInput.type = 'password';
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        }
+                }
+                });
+            });
+            
+            // Formularios
+            document.getElementById('userLoginForm').addEventListener('submit', handleUserLogin);
+            document.getElementById('adminLoginForm').addEventListener('submit', handleAdminLogin);
+            
+            // Inicializar tema
+            if (window.unifiedThemeManager) {
+                window.unifiedThemeManager.init();
+            }
+        });
+        
+        // Función para mostrar formulario de registro
+        function showRegisterForm() {
+            const loginForm = document.getElementById('userLoginForm');
+            const loginFooter = document.querySelector('.login-footer');
+            
+            // Crear formulario de registro
+            const registerForm = document.createElement('form');
+            registerForm.id = 'registerForm';
+            registerForm.className = 'modern-form';
+            registerForm.innerHTML = `
+                <div class="form-group modern-group">
+                    <label for="registerUsername">Nombre de Usuario</label>
+                    <div class="form-input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="registerUsername" name="username" required 
+                               placeholder="Elige un nombre de usuario">
+                    </div>
+                </div>
+                
+                <div class="form-group modern-group">
+                    <label for="registerEmail">Email</label>
+                    <div class="form-input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="registerEmail" name="email" required 
+                               placeholder="tu@email.com">
+                    </div>
+                </div>
+                
+                <div class="form-group modern-group">
+                    <label for="registerPassword">Contraseña</label>
+                    <div class="form-input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="registerPassword" name="password" required 
+                               placeholder="Mínimo 8 caracteres">
+                        <button type="button" class="toggle-password" data-target="registerPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group modern-group">
+                    <label for="registerConfirmPassword">Confirmar Contraseña</label>
+                    <div class="form-input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="registerConfirmPassword" name="confirmPassword" required 
+                               placeholder="Repite tu contraseña">
+                        <button type="button" class="toggle-password" data-target="registerConfirmPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group modern-group">
+                    <label for="registerFullName">Nombre Completo (Opcional)</label>
+                    <div class="form-input-wrapper">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" id="registerFullName" name="fullName" 
+                               placeholder="Tu nombre completo">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary modern-btn">
+                    <i class="fas fa-user-plus"></i> Crear Cuenta
+                </button>
+                
+                <div class="login-footer">
+                    <p>¿Ya tienes cuenta? <a href="#" class="register-link" onclick="hideRegisterForm()">Iniciar sesión</a></p>
+                </div>
+            `;
+            
+            // Reemplazar el formulario de login con el de registro
+            loginForm.style.display = 'none';
+            loginFooter.style.display = 'none';
+            
+            const loginCard = loginForm.parentElement;
+            loginCard.insertBefore(registerForm, loginFooter);
+            
+            // Añadir event listener al formulario de registro
+            registerForm.addEventListener('submit', handleRegister);
+            
+            // Re-inicializar toggle password para los nuevos campos
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const passwordInput = document.getElementById(targetId);
+                    const icon = this.querySelector('i');
+                    
+                    if (passwordInput && icon) {
+                        if (passwordInput.type === 'password') {
+                            passwordInput.type = 'text';
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            passwordInput.type = 'password';
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Función para ocultar formulario de registro
+        function hideRegisterForm() {
+            const registerForm = document.getElementById('registerForm');
+            const loginForm = document.getElementById('userLoginForm');
+            const loginFooter = document.querySelector('.login-footer');
+            
+            if (registerForm) {
+                registerForm.remove();
+            }
+            
+            loginForm.style.display = 'block';
+            loginFooter.style.display = 'block';
+        }
+        
+        // Función de registro de usuario
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const fullName = document.getElementById('registerFullName').value;
+            
+            // Validaciones
+            if (password !== confirmPassword) {
+                window.LaboriaAPI.showNotification('Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            if (password.length < 8) {
+                window.LaboriaAPI.showNotification('La contraseña debe tener al menos 8 caracteres', 'error');
+                return;
+            }
+            
+            try {
+                console.log('Intentando registrar usuario:', { username, email, fullName });
+                
+                const response = await window.LaboriaAPI.registerUsuario({
+                    username,
+                    email,
+                    password,
+                    confirmPassword,
+                    fullName
+                });
+                
+                if (response.success) {
+                    console.log('Registro exitoso:', response);
+                    window.LaboriaAPI.showNotification('¡Cuenta creada exitosamente! Por favor inicia sesión.', 'success');
+                    
+                    // Limpiar formulario y volver al login
+                    hideRegisterForm();
+                    document.getElementById('userLoginForm').reset();
+                } else {
+                    console.error('Error en registro:', response.message);
+                    window.LaboriaAPI.showNotification(response.message || 'Error en el registro', 'error');
+                }
+            } catch (error) {
+                console.error('Error en registro:', error);
+                window.LaboriaAPI.showNotification('Error de conexión. Intenta nuevamente.', 'error');
+            }
+        }
+        
+        // Función de login de usuario
+        async function handleUserLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            
+            try {
+                console.log('Intentando login de usuario:', email);
+                
+                const response = await window.LaboriaAPI.loginUsuario(email, password);
+                
+                if (response.success) {
+                    console.log('Login de usuario exitoso:', response);
+                    
+                    // Guardar datos del usuario
+                    window.LaboriaAPI.usuarioActual = response.data.user;
+                    window.LaboriaAPI.saveAuthTokens(response.data.token, response.data.user);
+                    
+                    // Redirigir según el rol
+                    if (response.data.user.rol === 'user') {
+                        window.location.href = '../usuario/perfil.html';
+                    } else {
+                        window.location.href = '../pages/admin-master/InicioAdmin.html';
+                    }
+                } else {
+                    console.error('Error en login:', response.message);
+                    window.LaboriaAPI.showNotification(response.message || 'Error en el login', 'error');
+                }
+            } catch (error) {
+                console.error('Error en login:', error);
+                window.LaboriaAPI.showNotification('Error de conexión. Intenta nuevamente.', 'error');
+            }
+        }
+        
+        // Función de login de administrador
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            try {
+                console.log('Intentando login de administrador:', email);
+                
+                const response = await window.LaboriaAPI.loginAdmin(email, password);
+                
+                if (response.success) {
+                    console.log('Login de administrador exitoso:', response);
+                    
+                    // Guardar datos del administrador
+                    window.LaboriaAPI.usuarioActual = response.data.user;
+                    window.LaboriaAPI.saveAuthTokens(response.data.token, response.data.user);
+                    
+                    // Redirigir según el rol
+                    if (response.data.user.rol === 'admin_master') {
+                        window.location.href = '../pages/admin-master/InicioAdmin.html';
+                    } else if (response.data.user.rol === 'admin_invitado') {
+                        window.location.href = '../pages/admin-invitado/Inicio-Invi-Admin.html';
+                    } else {
+                        window.location.href = '../usuario/perfil.html';
+                    }
+                } else {
+                    console.error('Error en login:', response.message);
+                    window.LaboriaAPI.showNotification(response.message || 'Error en el login', 'error');
+                }
+            } catch (error) {
+                console.error('Error en login:', error);
+                window.LaboriaAPI.showNotification('Error de conexión. Intenta nuevamente.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

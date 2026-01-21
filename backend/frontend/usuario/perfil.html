@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Laboria</title>
+    
+    <!-- Scripts compartidos (orden optimizado) -->
+    <script src="../shared/constants.js"></script>
+    <script src="../js/api-client.js"></script>
+    <script src="../shared/ui-system.js"></script>
+    <script src="../shared/notification-system.js"></script>
+    <script src="../shared/navigation-system.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
+    
+    <!-- Estilos CSS Unificados -->
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../styles/accessibility-ux.css">
+    <script src="../styles/theme-switcher.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos mejorados para perfil de usuario - Modern Design */
+        .profile-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 2rem;
+        }
+        
+        .profile-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--theme-radius-lg);
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--theme-shadow-lg);
+            border: 1px solid var(--theme-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--theme-gradient);
+        }
+        
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--theme-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: var(--theme-shadow-lg);
+        }
+        
+        .profile-avatar i {
+            z-index: 1;
+        }
+        
+        .profile-details h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--theme-text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-details p {
+            color: var(--theme-text-secondary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .profile-details p i {
+            color: var(--theme-primary);
+            width: 20px;
+        }
+        
+        .profile-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--theme-radius-lg);
+            padding: 2rem;
+            box-shadow: var(--theme-shadow-md);
+            border: 1px solid var(--theme-border);
+            transition: all 0.3s ease;
+        }
+        
+        .content-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--theme-shadow-xl);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--theme-border);
+        }
+        
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--theme-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: var(--theme-gradient);
+            color: white;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--theme-text-primary);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--theme-text-primary);
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--theme-border);
+            border-radius: var(--theme-radius-md);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--theme-primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--theme-bg-secondary);
+            border-radius: var(--theme-radius-md);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--theme-primary);
+        }
+        
+        .stat-label {
+            color: var(--theme-text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .skill-tag {
+            padding: 0.5rem 1rem;
+            background: var(--theme-gradient);
+            color: white;
+            border-radius: var(--theme-radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--theme-border);
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--theme-bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--theme-primary);
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 500;
+            color: var(--theme-text-primary);
+        }
+        
+        .activity-date {
+            font-size: 0.875rem;
+            color: var(--theme-text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 1rem;
+            }
+            
+            .profile-header {
+                padding: 2rem;
+            }
+            
+            .profile-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .profile-actions {
+                justify-content: center;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="profile-container">
+    <!-- Logo de Laboria -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <img id="userProfileLogo" src="../assets/logo-negro.png" alt="Laboria" style="width: 60px; height: 60px; object-fit: contain;">
+    </div>
+    
+    <!-- Header del Perfil -->
+    <div class="profile-header">
+        <div class="profile-info">
+            <div class="profile-avatar" onclick="document.getElementById('avatarInput').click()">
+                <i class="fas fa-user"></i>
+                <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="handleAvatarChange(event)">
+            </div>
+            <div class="profile-details">
+                <h1 id="userName">Usuario Laboria</h1>
+                <p><i class="fas fa-envelope"></i> <span id="userEmail">usuario@laboria.com</span></p>
+                <p><i class="fas fa-briefcase"></i> <span id="userRole">Usuario Regular</span></p>
+                <p><i class="fas fa-map-marker-alt"></i> <span id="userLocation">Madrid, España</span></p>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <button class="btn btn-primary" onclick="editProfile()">
+                <i class="fas fa-edit"></i> Editar Perfil
+            </button>
+            <button class="btn btn-secondary" onclick="document.getElementById('avatarInput').click()">
+                <i class="fas fa-camera"></i> Cambiar Avatar
+            </button>
+            <button class="btn btn-secondary" onclick="viewDashboard()">
+                <i class="fas fa-home"></i> Dashboard
+            </button>
+            <button class="btn btn-danger" onclick="handleLogout()">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+        </div>
+    </div>
+    
+    <!-- Contenido Principal -->
+    <div class="content-grid">
+        <!-- Información Personal -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 class="card-title">Información Personal</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="nombre">Nombre Completo</label>
+                    <input type="text" id="nombre" value="Usuario Laboria" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" value="usuario@laboria.com" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" value="+34 600 000 000" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="ubicacion">Ubicación</label>
+                    <input type="text" id="ubicacion" value="Madrid, España" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="bio">Biografía</label>
+                    <textarea id="bio" placeholder="Cuéntate sobre ti..." readonly>Profesional con experiencia en desarrollo web y diseño UX. Apasionado por crear soluciones digitales innovadoras.</textarea>
+                </div>
+                <button class="btn btn-primary" onclick="saveProfile()">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mis Estadísticas -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="card-title">Mis Estadísticas</h3>
+            </div>
+            <div class="card-body">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Postulaciones</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">5</div>
+                        <div class="stat-label">Entrevistas</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">Cursos Completados</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Certificados</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Habilidades -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3 class="card-title">Habilidades</h3>
+            </div>
+            <div class="card-body">
+                <div class="skill-tags">
+                    <span class="skill-tag">JavaScript</span>
+                    <span class="skill-tag">React</span>
+                    <span class="skill-tag">Node.js</span>
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">MongoDB</span>
+                </div>
+                <button class="btn btn-secondary" onclick="editSkills()" style="margin-top: 1rem;">
+                    <i class="fas fa-plus"></i> Agregar Habilidad
+                </button>
+            </div>
+        </div>
+        
+        <!-- Actividad Reciente -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <h3 class="card-title">Actividad Reciente</h3>
+            </div>
+            <div class="card-body">
+                <div class="recent-activity">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Postulación enviada</div>
+                            <div class="activity-date">Hace 2 días</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Curso completado</div>
+                            <div class="activity-date">Hace 1 semana</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Certificado obtenido</div>
+                            <div class="activity-date">Hace 2 semanas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script>
+        // Funciones del perfil
+        function editProfile() {
+            const inputs = document.querySelectorAll('.form-group input, .form-group textarea');
+            inputs.forEach(input => {
+                input.removeAttribute('readonly');
+                input.style.backgroundColor = 'white';
+                input.style.borderColor = 'var(--theme-primary)';
+            });
+            
+            const saveBtn = document.querySelector('.btn-primary');
+            saveBtn.style.display = 'block';
+        }
+        
+        function saveProfile() {
+            const inputs = document.querySelectorAll('.form-group input, .form-group textarea');
+            inputs.forEach(input => {
+                input.setAttribute('readonly', true);
+                input.style.backgroundColor = 'transparent';
+                input.style.borderColor = 'var(--theme-border)';
+            });
+            
+            // Mostrar notificación
+            if (window.LaboriaAPI) {
+                window.LaboriaAPI.showNotification('Perfil actualizado correctamente', 'success');
+            }
+        }
+        
+        function editSkills() {
+            if (window.LaboriaAPI) {
+                window.LaboriaAPI.showNotification('Editor de habilidades en desarrollo', 'info');
+            }
+        }
+        
+        function viewDashboard() {
+            window.location.href = '../pages/index.html';
+        }
+        
+        function handleLogout() {
+            if (window.LaboriaAPI) {
+                window.LaboriaAPI.clearAuthTokens();
+                window.LaboriaAPI.showNotification('Has cerrado sesión correctamente', 'info');
+            }
+            setTimeout(() => {
+                window.location.href = '../pages/index.html';
+            }, 1000);
+        }
+        
+        function handleAvatarChange(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatar = document.querySelector('.profile-avatar');
+                    avatar.style.backgroundImage = `url(${e.target.result})`;
+                    avatar.style.backgroundSize = 'cover';
+                    avatar.style.backgroundPosition = 'center';
+                    avatar.innerHTML = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Cargar datos del usuario
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.LaboriaAPI && window.LaboriaAPI.usuarioActual) {
+                const user = window.LaboriaAPI.usuarioActual;
+                document.getElementById('userName').textContent = user.nombre || 'Usuario Laboria';
+                document.getElementById('userEmail').textContent = user.email || 'usuario@laboria.com';
+                document.getElementById('userRole').textContent = user.rol || 'Usuario Regular';
+            }
+        });
+    </script>
+</body>
+</html>

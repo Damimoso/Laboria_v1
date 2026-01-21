@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboria Admin Master - Empleos</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: #667eea;
+        }
+        
+        .logo h1 {
+            color: #333;
+            font-size: 1.5rem;
+        }
+        
+        .admin-badge {
+            background: #f44336;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        
+        .search-bar input {
+            border: none;
+            outline: none;
+            flex: 1;
+            padding: 0.25rem;
+        }
+        
+        .search-bar i {
+            color: #667eea;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: #333;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .nav a:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .nav a.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .content-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .content-header h2 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .content-header p {
+            color: #666;
+        }
+        
+        .actions-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .job-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .job-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        
+        .job-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .job-company {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .job-location {
+            color: #999;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .job-salary {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .job-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tag {
+            background: #f0f0f0;
+            color: #666;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        
+        .job-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .job-stats {
+            display: flex;
+            gap: 1rem;
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        .job-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .edit-btn {
+            color: #4CAF50;
+        }
+        
+        .view-btn {
+            color: #2196F3;
+        }
+        
+        .delete-btn {
+            color: #f44336;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            <h1>Laboria Admin</h1>
+            <span class="admin-badge">Master</span>
+        </div>
+        
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="search" id="searchInput" placeholder="Buscar empleos, empresas, ubicaciones...">
+        </div>
+        
+        <nav class="nav">
+            <a href="/pages/admin-master/dashboard.html">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            <a href="/pages/admin-master/usuarios.html">
+                <i class="fas fa-users"></i>
+                Usuarios
+            </a>
+            <a href="/pages/admin-master/admins.html">
+                <i class="fas fa-user-shield"></i>
+                Admins
+            </a>
+            <a href="/pages/admin-master/empleos.html" class="active">
+                <i class="fas fa-briefcase"></i>
+                Empleos
+            </a>
+            <a href="/pages/admin-master/cursos.html">
+                <i class="fas fa-graduation-cap"></i>
+                Cursos
+            </a>
+            <a href="/pages/admin-master/analisis.html">
+                <i class="fas fa-chart-line"></i>
+                Análisis
+            </a>
+            <a href="/pages/admin-master/ajustes.html">
+                <i class="fas fa-cog"></i>
+                Ajustes
+            </a>
+            <a href="#" class="logout-btn" onclick="cerrarSesionAdmin()">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+            </a>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-header">
+            <h2>Gestión de Empleos</h2>
+            <p>Administra todas las ofertas de trabajo del sistema</p>
+        </div>
+        
+        <div class="actions-bar">
+            <button class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Nuevo Empleo
+            </button>
+            <button class="btn btn-secondary">
+                <i class="fas fa-filter"></i>
+                Filtros
+            </button>
+            <button class="btn btn-secondary">
+                <i class="fas fa-download"></i>
+                Exportar
+            </button>
+        </div>
+        
+        <div class="jobs-grid" id="jobsGrid">
+            <!-- Job Card 1 -->
+            <div class="job-card" data-title="Desarrollador Senior" data-company="TechCorp" data-location="Madrid">
+                <div class="job-header">
+                    <div>
+                        <h3 class="job-title">Desarrollador Senior</h3>
+                        <div class="job-company">TechCorp</div>
+                        <div class="job-location">Madrid, España</div>
+                    </div>
+                </div>
+                <div class="job-salary">€45,000 - €60,000</div>
+                <div class="job-tags">
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">React</span>
+                    <span class="tag">Node.js</span>
+                </div>
+                <div class="job-footer">
+                    <div class="job-stats">
+                        <span><i class="fas fa-eye"></i> 234</span>
+                        <span><i class="fas fa-paper-plane"></i> 45</span>
+                        <span><i class="fas fa-calendar"></i> 5 Ene</span>
+                    </div>
+                    <div class="job-actions">
+                        <button class="action-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn view-btn">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn delete-btn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Job Card 2 -->
+            <div class="job-card" data-title="Diseñador UX/UI" data-company="CreativeStudio" data-location="Barcelona">
+                <div class="job-header">
+                    <div>
+                        <h3 class="job-title">Diseñador UX/UI</h3>
+                        <div class="job-company">CreativeStudio</div>
+                        <div class="job-location">Barcelona, España</div>
+                    </div>
+                </div>
+                <div class="job-salary">€35,000 - €45,000</div>
+                <div class="job-tags">
+                    <span class="tag">Figma</span>
+                    <span class="tag">Adobe XD</span>
+                    <span class="tag">UI Design</span>
+                </div>
+                <div class="job-footer">
+                    <div class="job-stats">
+                        <span><i class="fas fa-eye"></i> 156</span>
+                        <span><i class="fas fa-paper-plane"></i> 28</span>
+                        <span><i class="fas fa-calendar"></i> 8 Ene</span>
+                    </div>
+                    <div class="job-actions">
+                        <button class="action-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn view-btn">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn delete-btn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Job Card 3 -->
+            <div class="job-card" data-title="DevOps Engineer" data-company="CloudTech" data-location="Remoto">
+                <div class="job-header">
+                    <div>
+                        <h3 class="job-title">DevOps Engineer</h3>
+                        <div class="job-company">CloudTech</div>
+                        <div class="job-location">Remoto</div>
+                    </div>
+                </div>
+                <div class="job-salary">€50,000 - €70,000</div>
+                <div class="job-tags">
+                    <span class="tag">AWS</span>
+                    <span class="tag">Docker</span>
+                    <span class="tag">Kubernetes</span>
+                </div>
+                <div class="job-footer">
+                    <div class="job-stats">
+                        <span><i class="fas fa-eye"></i> 298</span>
+                        <span><i class="fas fa-paper-plane"></i> 67</span>
+                        <span><i class="fas fa-calendar"></i> 5 Ene</span>
+                    </div>
+                    <div class="job-actions">
+                        <button class="action-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn view-btn">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn delete-btn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Función de búsqueda en tiempo real
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const jobCards = document.querySelectorAll('.job-card');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                jobCards.forEach(card => {
+                    const title = card.dataset.title.toLowerCase();
+                    const company = card.dataset.company.toLowerCase();
+                    const location = card.dataset.location.toLowerCase();
+                    
+                    const matchesSearch = title.includes(searchTerm) || 
+                                       company.includes(searchTerm) || 
+                                       location.includes(searchTerm);
+                    
+                    if (matchesSearch) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+            });
+        });
+        
+        // Función para cerrar sesión de administrador
+        function cerrarSesionAdmin() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión como administrador?')) {
+                // Limpiar datos de sesión
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminData');
+                sessionStorage.clear();
+                
+                // Redirigir a página de login
+                window.location.href = '/pages/index.html';
+            }
+        }
+    </script>
+</body>
+</html>
