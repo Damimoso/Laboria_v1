@@ -265,11 +265,13 @@ class ProductionServer {
             });
         });
         
-        // Rutas de API
-        app.use('/api/auth', require('./routes/auth'));
-        app.use('/api/users', require('./routes/users'));
-        app.use('/api/jobs', require('./routes/jobs'));
-        app.use('/api/courses', require('./routes/courses'));
+        // Rutas de API temporalmente deshabilitadas para debugging
+        console.log('🔧 Usando rutas simplificadas para debugging');
+        
+        app.use('/api/auth', require('./routes/auth-simple'));
+        // app.use('/api/users', require('./routes/users'));
+        // app.use('/api/jobs', require('./routes/jobs'));
+        // app.use('/api/courses', require('./routes/courses'));
         
         // Rutas de health check
         app.get('/api/health', (req, res) => {
@@ -300,16 +302,20 @@ class ProductionServer {
                 });
             }
             
-            // Servir index.html para rutas de frontend
-            const indexPath = './frontend/pages/index.html';
-            if (fs.existsSync(indexPath)) {
-                res.sendFile(indexPath);
-            } else {
-                res.status(404).json({
-                    success: false,
-                    message: 'Frontend not found'
-                });
-            }
+            // Servir página de bienvenida simple
+            res.send(`
+                <html>
+                    <head><title>Laboria - Servidor Funcionando</title></head>
+                    <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
+                        <h1>🚀 Laboria Server</h1>
+                        <p>✅ Servidor funcionando correctamente</p>
+                        <p>🔍 Health Check: <a href="/health">/health</a></p>
+                        <p>🔍 API Health: <a href="/api/health">/api/health</a></p>
+                        <p>📊 Environment: ${process.env.NODE_ENV}</p>
+                        <p>🌐 Port: ${process.env.PORT || 10000}</p>
+                    </body>
+                </html>
+            `);
         });
     }
 
