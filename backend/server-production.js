@@ -293,6 +293,17 @@ class ProductionServer {
         // Rutas estáticas
         app.use('/uploads', require('express').static('./uploads'));
         
+        // Servir recursos estáticos del frontend
+        app.use('/styles', require('express').static('../frontend/styles'));
+        app.use('/js', require('express').static('../frontend/js'));
+        app.use('/shared', require('express').static('../shared'));
+        
+        // Rutas de API
+        app.use('/api/auth', require('./routes/auth'));
+        app.use('/api/users', require('./routes/users'));
+        app.use('/api/jobs', require('./routes/jobs'));
+        app.use('/api/courses', require('./routes/courses'));
+        
         // Middleware para páginas SPA
         app.get('*', (req, res) => {
             if (req.path.startsWith('/api/')) {
