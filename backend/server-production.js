@@ -12,12 +12,14 @@ const path = require('path');
 // Cargar variables de entorno para producción
 require('dotenv').config({ path: '.env.production' });
 
-// Cargar configuración existente
-const { LABORIA_CONFIG } = require('./config/constants');
-
 class ProductionServer {
     constructor() {
-        this.config = LABORIA_CONFIG.BACKEND_CONFIG;
+        // Configuración simple para producción
+        this.config = {
+            port: process.env.PORT || 10000,
+            host: '0.0.0.0',
+            nodeEnv: process.env.NODE_ENV || 'production'
+        };
         this.isMaster = cluster.isMaster;
         this.workers = [];
         this.shutdownInProgress = false;
@@ -57,6 +59,7 @@ class ProductionServer {
         console.log('🚀 Iniciando servidor Laboria en modo producción');
         console.log(`📊 CPUs detectadas: ${os.cpus().length}`);
         console.log(`🌍 Ambiente: ${process.env.NODE_ENV}`);
+        console.log(`🌐 Puerto: ${this.config.port}`);
         
         // Verificar configuración
         await this.validateConfiguration();
@@ -69,9 +72,6 @@ class ProductionServer {
         
         // Configurar monitoreo
         this.setupMonitoring();
-        
-        // Configurar backup automático
-        this.setupBackup();
         
         console.log('✅ Servidor de producción iniciado correctamente');
     }
@@ -352,12 +352,12 @@ class ProductionServer {
         
         // Iniciar servidor
         await new Promise((resolve, reject) => {
-            const port = process.env.PORT || 10000;
-            server.listen(port, '0.0.0.0', (error) => {
+            const port = this.config.port;
+            server.listen(port, this.config.host, (error) => {
                 if (error) {
                     reject(error);
                 } else {
-                    console.log(`🌐 Servidor escuchando en 0.0.0.0:${port}`);
+                    console.log(`🌐 Servidor escuchando en ${this.config.host}:${port}`);
                     resolve();
                 }
             });
