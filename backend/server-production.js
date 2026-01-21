@@ -61,8 +61,8 @@ class ProductionServer {
         console.log(`🌍 Ambiente: ${process.env.NODE_ENV}`);
         console.log(`🌐 Puerto: ${this.config.port}`);
         
-        // Verificar configuración
-        await this.validateConfiguration();
+        // Verificar configuración (simplificado para debugging)
+        // await this.validateConfiguration();
         
         // Crear directorios necesarios
         await this.createDirectories();
@@ -219,8 +219,8 @@ class ProductionServer {
         
         const app = express();
         
-        // Middleware de seguridad básico
-        app.use(helmet());
+        // Middleware de seguridad básico (deshabilitado para debugging)
+        // app.use(helmet());
         
         // Configuración de CORS
         app.use(cors({
@@ -228,16 +228,16 @@ class ProductionServer {
             credentials: true
         }));
         
-        // Rate limiting simple
-        const rateLimit = require('express-rate-limit');
-        const limiter = rateLimit({
-            windowMs: 15 * 60 * 1000, // 15 minutos
-            max: 100 // límite por IP
-        });
-        app.use('/api/', limiter);
+        // Rate limiting simple (deshabilitado para debugging)
+        // const rateLimit = require('express-rate-limit');
+        // const limiter = rateLimit({
+        //     windowMs: 15 * 60 * 1000, // 15 minutos
+        //     max: 100 // límite por IP
+        // });
+        // app.use('/api/', limiter);
         
-        // Logging simple
-        app.use(morgan('combined'));
+        // Logging simple (deshabilitado para debugging)
+        // app.use(morgan('combined'));
         
         // Body parser
         app.use(express.json({ limit: '10mb' }));
