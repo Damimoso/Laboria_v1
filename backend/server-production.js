@@ -265,10 +265,10 @@ class ProductionServer {
             });
         });
         
-        // Rutas de API temporalmente deshabilitadas para debugging
-        console.log('🔧 Usando rutas simplificadas para debugging');
+        // Rutas de API - habilitando progresivamente para debugging
+        console.log('🔧 Habilitando rutas originales progresivamente');
         
-        app.use('/api/auth', require('./routes/auth-simple'));
+        app.use('/api/auth', require('./routes/auth'));
         // app.use('/api/users', require('./routes/users'));
         // app.use('/api/jobs', require('./routes/jobs'));
         // app.use('/api/courses', require('./routes/courses'));
