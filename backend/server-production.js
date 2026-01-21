@@ -168,7 +168,8 @@ class ProductionServer {
         
         for (let i = 0; i < numWorkers; i++) {
             const worker = cluster.fork({
-                WORKER_ID: i + 1
+                WORKER_ID: i + 1,
+                PORT: process.env.PORT || 10000
             });
             
             this.workers.push(worker);
@@ -255,6 +256,15 @@ class ProductionServer {
     }
 
     async loadRoutes(app) {
+        // Health check principal para Render
+        app.get('/health', (req, res) => {
+            res.status(200).json({
+                status: 'healthy',
+                timestamp: new Date().toISOString(),
+                port: process.env.PORT || 10000
+            });
+        });
+        
         // Rutas de API
         app.use('/api/auth', require('./routes/auth'));
         app.use('/api/users', require('./routes/users'));
