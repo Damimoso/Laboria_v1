@@ -9,7 +9,7 @@ services:
     env: node
     plan: free
     buildCommand: "cd backend && npm install --omit=dev && npm run build"
-    startCommand: "cd backend && node server-fase4.js"
+    startCommand: "cd backend && node server-fase5.js"
     envVars:
       - key: NODE_ENV
         value: production
