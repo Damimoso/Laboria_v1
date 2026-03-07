@@ -6,7 +6,7 @@
 const API_CONFIG = {
     BASE_URL: (typeof window !== 'undefined' && window.location.hostname === 'laboria.onrender.com') 
         ? 'https://laboria-api.onrender.com/api'
-        : 'http://127.0.0.1:3000/api',
+        : 'http://127.0.0.1:10000/api',
     TIMEOUT: 15000,
     RETRY_ATTEMPTS: 3,
     ENDPOINTS: {
@@ -48,6 +48,30 @@ const API_CONFIG = {
             MARK_READ: '/notifications/:id/read',
             DELETE: '/notifications/:id',
             READ_ALL: '/notifications/read-all'
+        },
+        // Fase 6 Next-Gen Endpoints
+        AI: {
+            CV_GENERATE: '/ai/cv/generate',
+            PROFILE_OPTIMIZE: '/ai/profile/optimize',
+            NLP_SEARCH: '/ai/nlp/search',
+            CAREER_ADVICE: '/ai/career/advice',
+            PREDICTIVE_TRENDS: '/ai/predictive/market-trends'
+        },
+        BLOCKCHAIN: {
+            CREDENTIALS_ISSUE: '/blockchain/credentials/issue',
+            CREDENTIALS_VERIFY: '/blockchain/credentials/:hash/verify',
+            SMART_CONTRACTS_DEPLOY: '/blockchain/smart-contracts/deploy',
+            DID_CREATE: '/blockchain/did/create',
+            TOKENS_MINT: '/blockchain/tokens/mint',
+            TOKENS_TRANSFER: '/blockchain/tokens/transfer',
+            TOKENS_BALANCE: '/blockchain/tokens/balance'
+        },
+        REALTIME: {
+            LIVESTREAM_CREATE: '/realtime/livestream/create',
+            LIVESTREAM_JOIN: '/realtime/livestream/:id/join',
+            COLLABORATION_CREATE_ROOM: '/realtime/collaboration/create-room',
+            INTERVIEW_CREATE: '/realtime/interview/create',
+            CAREER_FAIR_CREATE: '/realtime/career-fair/create'
         }
     }
 };
@@ -105,8 +129,8 @@ const FILE_CONFIG = {
 // Configuración de la aplicación
 const APP_CONFIG = {
     NAME: 'Laboria',
-    VERSION: '1.0.0',
-    DESCRIPTION: 'Plataforma integral de empleo y formación profesional',
+    VERSION: '6.0.0-nextgen',
+    DESCRIPTION: 'Plataforma integral de empleo y formación profesional - Fase 6 Next-Gen',
     AUTHOR: 'Laboria Team',
     SUPPORT_EMAIL: 'support@laboria.com',
     SOCIAL_LINKS: {

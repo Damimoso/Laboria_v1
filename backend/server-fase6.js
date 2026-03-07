@@ -73,8 +73,10 @@ app.use(cors({
             'https://metaverse.laboria.com',
             'http://localhost:3000',
             'http://localhost:5500',
+            'http://localhost:10000',
             'https://localhost:3000',
-            'https://localhost:5500'
+            'https://localhost:5500',
+            'https://localhost:10000'
         ];
         
         if (!origin) return callback(null, true);
@@ -574,6 +576,58 @@ async function seedDatabaseNextGen() {
             ]);
         }
         
+        // Crear tablas base heredadas de Fase 5
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                full_name TEXT,
+                role TEXT DEFAULT 'user',
+                bio TEXT,
+                skills TEXT,
+                experience TEXT,
+                education TEXT,
+                location TEXT,
+                website TEXT,
+                linkedin_url TEXT,
+                github_url TEXT,
+                profile_image TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS marketplace_partners (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                partner_name TEXT NOT NULL,
+                partner_type TEXT NOT NULL,
+                status TEXT DEFAULT 'active',
+                api_key TEXT UNIQUE,
+                webhook_url TEXT,
+                commission_rate REAL DEFAULT 0.10,
+                revenue_share REAL DEFAULT 0.90,
+                contact_email TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS subscription_plans (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                plan_name TEXT NOT NULL UNIQUE,
+                plan_type TEXT NOT NULL,
+                price_monthly REAL NOT NULL,
+                price_yearly REAL NOT NULL,
+                features TEXT,
+                limits TEXT,
+                status TEXT DEFAULT 'active',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        
         // Insertar smart contracts
         const smartContracts = [
             {
@@ -588,24 +642,13 @@ async function seedDatabaseNextGen() {
                 deployed_by: 1
             },
             {
-                contract_name: 'RevenueShare',
-                contract_address: '0x2345678901234567890123456789012345678901',
-                contract_type: 'revenue_share',
-                abi: JSON.stringify([
-                    'function distributeRevenue(uint256 amount)',
-                    'function claimRevenue()',
-                    'event RevenueDistributed(uint256 amount, uint256 timestamp)'
-                ]),
-                deployed_by: 1
-            },
-            {
-                contract_name: 'CredentialVerification',
-                contract_address: '0x3456789012345678901234567890123456789012',
+                contract_name: 'LaboriaCredential',
+                contract_address: '0x0987654321098765432109876543210987654321',
                 contract_type: 'credential',
                 abi: JSON.stringify([
-                    'function issueCredential(address to, bytes32 hash)',
-                    'function verifyCredential(bytes32 hash) returns (bool)',
-                    'event CredentialIssued(address indexed to, bytes32 indexed hash)'
+                    'function issueCredential(address to, string memory cid) returns (bool)',
+                    'function verifyCredential(string memory cid) returns (bool)',
+                    'event CredentialIssued(address indexed to, string cid)'
                 ]),
                 deployed_by: 1
             }
@@ -787,18 +830,24 @@ async function initAISystem() {
             generateCV: async function(userId, profileData) {
                 const startTime = Date.now();
                 
-                // Simular llamada a ChatGPT API
-                const cvContent = `
+                try {
+                    // Validar datos de entrada
+                    if (!profileData || !profileData.full_name || !profileData.email) {
+                        throw new Error('Datos de perfil incompletos');
+                    }
+                    
+                    // Simular llamada a ChatGPT API
+                    const cvContent = `
 # ${profileData.full_name}
 
 ## Contact Information
 - Email: ${profileData.email}
-- Location: ${profileData.location}
-- LinkedIn: ${profileData.linkedin_url}
-- GitHub: ${profileData.github_url}
+- Location: ${profileData.location || 'No especificada'}
+- LinkedIn: ${profileData.linkedin_url || 'No disponible'}
+- GitHub: ${profileData.github_url || 'No disponible'}
 
 ## Professional Summary
-${profileData.bio}
+${profileData.bio || 'Sin resumen profesional'}
 
 ## Skills
 ${JSON.parse(profileData.skills || '[]').map(skill => `- ${skill}`).join('\n')}
@@ -824,21 +873,25 @@ ${JSON.parse(profileData.education || '[]').map(edu =>
                 const costUSD = tokensUsed * 0.00002; // $0.02 per 1K tokens
                 
                 // Registrar interacción AI
-                await db.run(`
-                    INSERT INTO ai_interactions 
-                    (user_id, interaction_type, input_text, output_text, model_version, 
-                     processing_time_ms, tokens_used, cost_usd)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                `, [
-                    userId, 'chatgpt', JSON.stringify(profileData), cvContent,
-                    'gpt-4-turbo', processingTime, tokensUsed, costUSD
-                ]);
+                try {
+                    await db.run(`
+                        INSERT INTO ai_interactions 
+                        (user_id, interaction_type, input_text, output_text, model_version, 
+                         processing_time_ms, tokens_used, cost_usd)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    `, [
+                        userId, 'cv_generation', JSON.stringify(profileData), cvContent,
+                        'gpt-4-turbo', processingTime, tokensUsed, costUSD
+                    ]);
+                } catch (dbError) {
+                    console.error('❌ Error registrando interacción AI:', dbError);
+                }
                 
                 return {
-                    cvContent,
-                    processingTime,
-                    tokensUsed,
-                    costUSD,
+                    cv_content: cvContent,
+                    processing_time_ms: processingTime,
+                    tokens_used: tokensUsed,
+                    cost_usd: costUSD,
                     model: 'gpt-4-turbo'
                 };
             },
@@ -1945,16 +1998,27 @@ app.use((req, res, next) => {
 // AI Endpoints
 app.post('/api/ai/cv/generate', async (req, res) => {
     try {
-        const { userId, profileData } = req.body;
+        const { user_id, profile_data } = req.body;
         
-        const result = await aiSystem.chatgpt.generateCV(userId, profileData);
+        if (!user_id || !profile_data) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'user_id y profile_data son requeridos' 
+            });
+        }
+        
+        const result = await aiSystem.chatgpt.generateCV(user_id, profile_data);
         
         res.json({
             success: true,
             data: result
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error del servidor' });
+        console.error('❌ Error en AI CV generation:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error del servidor: ' + error.message 
+        });
     }
 });
 
@@ -2114,16 +2178,34 @@ app.post('/api/realtime/career-fair/create', async (req, res) => {
 // Blockchain Endpoints
 app.post('/api/blockchain/credentials/issue', async (req, res) => {
     try {
-        const { userId, credentialData } = req.body;
+        const { user_id, credential_type, credential_name, issuer_name } = req.body;
         
-        const result = await blockchainSystem.credentials.issueCredential(userId, credentialData);
+        if (!user_id || !credential_type || !credential_name || !issuer_name) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'user_id, credential_type, credential_name y issuer_name son requeridos' 
+            });
+        }
+        
+        const credentialData = {
+            credential_type,
+            credential_name,
+            issuer_name,
+            issue_date: new Date().toISOString().split('T')[0]
+        };
+        
+        const result = await blockchainSystem.credentials.issueCredential(user_id, credentialData);
         
         res.json({
             success: true,
             data: result
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error del servidor' });
+        console.error('❌ Error en blockchain credentials:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error del servidor: ' + error.message 
+        });
     }
 });
 
@@ -2339,8 +2421,8 @@ app.get('/health', async (req, res) => {
         ],
         microservices: Object.keys(microservices).map(name => ({
             name,
-            version: microservices[name].version,
-            status: microservices[name].status
+            version: microservices[name]?.version || '1.0.0',
+            status: microservices[name]?.status || 'active'
         })),
         nextgen: {
             ai: {
@@ -2884,7 +2966,7 @@ async function startServer() {
             process.exit(1);
         }
         
-        server.listen(PORT, HOST, () => {
+        server.listen(PORT, HOST, async () => {
             console.log('🌐 Servidor Next-Gen Fase 6 iniciado');
             console.log(`📍 Host: ${HOST}`);
             console.log(`🌐 Puerto: ${PORT}`);
@@ -2894,6 +2976,29 @@ async function startServer() {
             console.log(`🔍 API Health: http://${HOST}:${PORT}/api/health`);
             console.log(`📁 Directorio actual: ${process.cwd()}`);
             console.log(`📊 Environment: ${process.env.NODE_ENV || 'production'}`);
+            
+            // Test server availability
+            try {
+                const http = require('http');
+                const testReq = http.get({
+                    hostname: '127.0.0.1',
+                    port: PORT,
+                    path: '/health',
+                    timeout: 2000
+                }, (res) => {
+                    console.log('✅ Server health check passed');
+                    testReq.destroy();
+                });
+                testReq.on('error', () => {
+                    console.log('⚠️ Server started but health check failed');
+                });
+                testReq.on('timeout', () => {
+                    console.log('⚠️ Server health check timeout');
+                    testReq.destroy();
+                });
+            } catch (error) {
+                console.log('⚠️ Could not perform health check:', error.message);
+            }
             console.log('🔧 Características Next-Gen Fase 6:');
             console.log('   ✅ Frontend Optimizado');
             console.log('   ✅ SQLite Database Next-Gen');
