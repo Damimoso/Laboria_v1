@@ -7,8 +7,8 @@ const API_CONFIG = {
     BASE_URL: (typeof window !== 'undefined' && window.location?.hostname === 'localhost') 
         ? 'http://localhost:3000/api'
         : (typeof process !== 'undefined' && process.env.NODE_ENV === 'production' 
-            ? (process.env.API_BASE_URL || 'https://api.laboria.com')
-            : 'http://localhost:3000/api'),
+            ? (process.env.API_BASE_URL || 'https://laboria-api.onrender.com/api')
+            : 'https://laboria-api.onrender.com/api'),
     TIMEOUT: (typeof process !== 'undefined' ? parseInt(process.env.API_TIMEOUT) : 10000) || 10000,
     RETRY_ATTEMPTS: (typeof process !== 'undefined' ? parseInt(process.env.API_RETRY_ATTEMPTS) : 3) || 3,
     ENDPOINTS: {
