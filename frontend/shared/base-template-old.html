@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboria - [PAGE_TITLE]</title>
+    
+    <!-- Scripts compartidos (orden optimizado) -->
+    <script src="../shared/constants.js"></script>
+    <script src="../js/api-client.js"></script>
+    <script src="../shared/ui-system.js"></script>
+    <script src="../shared/notification-system.js"></script>
+    
+    <!-- Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
+    
+    <!-- Chart.js (si se necesita) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Estilos CSS Unificados -->
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../styles/accessibility-ux.css">
+    
+    <!-- Theme Switcher -->
+    <script src="../styles/theme-switcher.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
+        font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net;
+        img-src 'self' data: https:;
+        connect-src 'self' http://localhost:3000 http://127.0.0.1:3000 http://localhost:5500 http://127.0.0.1:5500 https://cdn.jsdelivr.net ws://localhost:3000 ws://127.0.0.1:3000 ws://localhost:5500 ws://127.0.0.1:5500;
+        frame-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
+    
+    <!-- Meta tags para SEO -->
+    <meta name="description" content="[PAGE_DESCRIPTION]">
+    <meta name="keywords" content="empleos, trabajo, cursos, desarrollo profesional, Laboria">
+    <meta name="author" content="Laboria Team">
+    
+    <!-- Open Graph para redes sociales -->
+    <meta property="og:title" content="Laboria - [PAGE_TITLE]">
+    <meta property="og:description" content="[PAGE_DESCRIPTION]">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="../assets/og-image.jpg">
+    
+    <!-- Estilos específicos de página -->
+    <style>
+        /* Estilos base comunes */
+        :root {
+            --theme-primary: #667eea;
+            --theme-secondary: #764ba2;
+            --theme-accent: #f093fb;
+            --theme-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --theme-text-primary: #2d3748;
+            --theme-text-secondary: #718096;
+            --theme-bg-primary: #ffffff;
+            --theme-bg-secondary: #f7fafc;
+            --theme-border: #e2e8f0;
+            --theme-success: #48bb78;
+            --theme-warning: #ed8936;
+            --theme-error: #f56565;
+            --theme-info: #4299e1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--theme-gradient);
+            min-height: 100vh;
+            color: var(--theme-text-primary);
+            line-height: 1.6;
+        }
+        
+        /* Container base */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Header base */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--theme-primary);
+            text-decoration: none;
+        }
+        
+        .brand i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Botones base */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--theme-primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: var(--theme-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--theme-text-primary);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: var(--theme-primary);
+            color: var(--theme-primary);
+            transform: translateY(-2px);
+        }
+        
+        /* Cards base */
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+            color: white;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--theme-text-primary);
+        }
+        
+        /* Formularios base */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--theme-text-primary);
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--theme-primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        /* Grid base */
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+        
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+        
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive base */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .nav {
+                padding: 1rem;
+            }
+            
+            .brand {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .grid-2,
+            .grid-3,
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Estilos específicos de página */
+        /* [PAGE_SPECIFIC_STYLES] */
+    </style>
+</head>
+<body class="[PAGE_BODY_CLASS]">
+    <!-- Header común -->
+    <header class="header" id="mainHeader">
+        <nav class="nav">
+            <a href="../pages/index.html" class="brand">
+                <img id="headerLogo" src="../assets/logo-negro.png" alt="Laboria" style="width: 32px; height: 32px; object-fit: contain; margin-right: 8px;">
+                <span>Laboria</span>
+            </a>
+            
+            <div class="nav-actions">
+                <!-- Botón tema -->
+                <button class="btn btn-secondary" onclick="toggleTheme()" title="Cambiar tema">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                
+                <!-- Notificaciones -->
+                <button class="btn btn-secondary" onclick="toggleNotifications()" title="Notificaciones">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                
+                <!-- Usuario -->
+                <div class="user-menu" id="userMenu">
+                    <button class="btn btn-primary" onclick="toggleUserMenu()">
+                        <i class="fas fa-user"></i>
+                        <span id="userName">Usuario</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="mainContent">
+        [PAGE_CONTENT]
+    </main>
+    
+    <!-- Footer común -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Laboria</h4>
+                    <p>Plataforma de desarrollo profesional y búsqueda de empleo.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <ul>
+                        <li><a href="../pages/index.html">Inicio</a></li>
+                        <li><a href="#">Empleos</a></li>
+                        <li><a href="#">Cursos</a></li>
+                        <li><a href="#">Sobre Nosotros</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <p>info@laboria.com</p>
+                    <p>+34 900 123 456</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Síguenos</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Laboria. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts comunes -->
+    <script>
+        // Variables globales
+        let currentPage = '[PAGE_NAME]';
+        let userRole = '[USER_ROLE]';
+        
+        // Inicialización común
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log(`🚀 Inicializando página: ${currentPage}`);
+            
+            // Inicializar tema
+            initializeTheme();
+            
+            // Verificar autenticación
+            await checkAuthentication();
+            
+            // Cargar datos del usuario
+            await loadUserData();
+            
+            // Inicializar notificaciones
+            initializeNotifications();
+            
+            // Ejecutar inicialización específica de página
+            if (typeof window.pageInit === 'function') {
+                await window.pageInit();
+            }
+            
+            console.log(`✅ Página ${currentPage} inicializada correctamente`);
+        });
+        
+        // Funciones comunes
+        async function checkAuthentication() {
+            if (!window.LaboriaAPI?.isAuthenticated()) {
+                if (currentPage !== 'login') {
+                    window.location.href = '../pages/index.html';
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        async function loadUserData() {
+            try {
+                const user = window.LaboriaAPI?.usuarioActual;
+                if (user) {
+                    document.getElementById('userName').textContent = user.nombre || 'Usuario';
+                    userRole = user.rol || 'usuario';
+                }
+            } catch (error) {
+                console.error('❌ Error cargando datos del usuario:', error);
+            }
+        }
+        
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        }
+        
+        function applyTheme(theme) {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (theme === 'dark') {
+                body.classList.add('dark-theme');
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                body.classList.remove('dark-theme');
+                themeIcon.className = 'fas fa-moon';
+            }
+        }
+        
+        function initializeNotifications() {
+            // Actualizar badge de notificaciones
+            updateNotificationBadge();
+        }
+        
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notificationBadge');
+            if (badge && window.LaboriaAPI) {
+                // Simular conteo de notificaciones
+                badge.textContent = '3';
+            }
+        }
+        
+        function toggleNotifications() {
+            window.LaboriaAPI?.showNotification('Centro de notificaciones en desarrollo', 'info');
+        }
+        
+        function toggleUserMenu() {
+            window.LaboriaAPI?.showNotification('Menú de usuario en desarrollo', 'info');
+        }
+        
+        // Función de logout común
+        async function handleLogout() {
+            try {
+                await window.LaboriaAPI?.logout();
+            } catch (error) {
+                console.error('❌ Error en logout:', error);
+                window.LaboriaAPI?.clearAuthTokens();
+                window.location.href = '../pages/index.html';
+            }
+        }
+        
+        // Función de navegación común
+        function navigateToPage(page) {
+            window.location.href = `../pages/${page}.html`;
+        }
+        
+        // Manejo de errores global
+        window.addEventListener('error', function(e) {
+            console.error('❌ Error global:', e.error);
+            window.LaboriaAPI?.showNotification('Ha ocurrido un error inesperado', 'error');
+        });
+        
+        // Manejo de promesas rechazadas no manejadas
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('❌ Promesa rechazada no manejada:', e.reason);
+            window.LaboriaAPI?.showNotification('Ha ocurrido un error en la aplicación', 'error');
+        });
+    </script>
+    
+    <!-- Scripts específicos de página -->
+    <script>
+        // [PAGE_SPECIFIC_SCRIPTS]
+    </script>
+</body>
+</html>
