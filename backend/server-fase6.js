@@ -59,6 +59,49 @@ app.use(compression({
     threshold: 256
 }));
 
+// Middleware adicional para manejar preflight OPTIONS (antes de cors)
+app.use((req, res, next) => {
+    if (req.method === 'OPTIONS') {
+        const origin = req.headers.origin;
+        const allowedOrigins = [
+            'https://laboria.onrender.com',
+            'https://laboria-api.onrender.com',
+            'https://api.laboria.com',
+            'https://app.laboria.com',
+            'https://nextgen.laboria.com',
+            'https://ai.laboria.com',
+            'https://blockchain.laboria.com',
+            'https://metaverse.laboria.com',
+            'http://localhost:3000',
+            'http://localhost:5500',
+            'http://localhost:10000',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:5500',
+            'http://127.0.0.1:10000',
+            'https://localhost:3000',
+            'https://localhost:5500',
+            'https://localhost:10000',
+            'https://127.0.0.1:3000',
+            'https://127.0.0.1:5500',
+            'https://127.0.0.1:10000'
+        ];
+        
+        if (!origin || allowedOrigins.includes(origin)) {
+            res.header('Access-Control-Allow-Origin', origin || '*');
+            res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+            res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-No-Compression, X-Request-ID, X-Trace-ID, X-Partner-Key, X-AI-Token, X-Blockchain-Signature');
+            res.header('Access-Control-Allow-Credentials', 'true');
+            res.header('Access-Control-Max-Age', '86400');
+            return res.status(204).end();
+        }
+        
+        res.header('Access-Control-Allow-Origin', '*');
+        return res.status(403).json({ error: 'CORS policy violation' });
+    }
+    
+    next();
+});
+
 // CORS optimizado para next-gen features
 app.use(cors({
     origin: function (origin, callback) {
@@ -74,9 +117,15 @@ app.use(cors({
             'http://localhost:3000',
             'http://localhost:5500',
             'http://localhost:10000',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:5500',
+            'http://127.0.0.1:10000',
             'https://localhost:3000',
             'https://localhost:5500',
-            'https://localhost:10000'
+            'https://localhost:10000',
+            'https://127.0.0.1:3000',
+            'https://127.0.0.1:5500',
+            'https://127.0.0.1:10000'
         ];
         
         if (!origin) return callback(null, true);
@@ -88,7 +137,8 @@ app.use(cors({
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-No-Compression', 'X-Request-ID', 'X-Trace-ID', 'X-Partner-Key', 'X-AI-Token', 'X-Blockchain-Signature'],
-    exposedHeaders: ['X-Total-Count', 'X-Page-Count', 'X-Request-ID', 'X-Trace-ID', 'X-Rate-Limit-Remaining', 'X-AI-Processing-Time', 'X-Blockchain-Tx-ID']
+    exposedHeaders: ['X-Total-Count', 'X-Page-Count', 'X-Request-ID', 'X-Trace-ID', 'X-Rate-Limit-Remaining', 'X-AI-Processing-Time', 'X-Blockchain-Tx-ID'],
+    optionsSuccessStatus: 204
 }));
 
 // Body parser optimizado para AI y blockchain
@@ -252,14 +302,15 @@ async function initDatabase() {
     try {
         console.log('🗄️ Inicializando base de datos Next-Gen Fase 6...');
         
-        // Crear múltiples conexiones para load balancing
-        for (let i = 0; i < NUM_CPUS; i++) {
+        // Para desarrollo, usar una sola conexión simple
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('🔧 Modo desarrollo detectado - usando base de datos simple');
             const connection = await open({
-                filename: `./laboria_fase6_${i}.db`,
+                filename: './laboria_fase6_0.db',
                 driver: sqlite3.Database
             });
             
-            // Optimizaciones SQLite next-gen
+            // Optimizaciones SQLite
             await connection.exec('PRAGMA foreign_keys = ON');
             await connection.exec('PRAGMA journal_mode = WAL');
             await connection.exec('PRAGMA synchronous = NORMAL');
@@ -268,11 +319,43 @@ async function initDatabase() {
             await connection.exec('PRAGMA mmap_size = 1073741824'); // 1GB
             await connection.exec('PRAGMA optimize');
             
-            dbConnections.push(connection);
+            db = connection;
+            dbConnections = [connection];
+            
+            // Exponer la base de datos globalmente
+            global.db = db;
+            
+            console.log('✅ Base de datos de desarrollo inicializada');
+        } else {
+            // Modo producción - múltiples conexiones para load balancing
+            console.log('🚀 Modo producción detectado - usando load balancing');
+            
+            for (let i = 0; i < NUM_CPUS; i++) {
+                const connection = await open({
+                    filename: `./laboria_fase6_${i}.db`,
+                    driver: sqlite3.Database
+                });
+                
+                // Optimizaciones SQLite next-gen
+                await connection.exec('PRAGMA foreign_keys = ON');
+                await connection.exec('PRAGMA journal_mode = WAL');
+                await connection.exec('PRAGMA synchronous = NORMAL');
+                await connection.exec('PRAGMA cache_size = 100000'); // 100MB cache
+                await connection.exec('PRAGMA temp_store = MEMORY');
+                await connection.exec('PRAGMA mmap_size = 1073741824'); // 1GB
+                await connection.exec('PRAGMA optimize');
+                
+                dbConnections.push(connection);
+            }
+            
+            // Usar la primera conexión como principal
+            db = dbConnections[0];
+            
+            // Exponer la base de datos globalmente
+            global.db = db;
+            
+            console.log(`✅ Base de datos de producción inicializada con ${NUM_CPUS} conexiones`);
         }
-        
-        // Usar la primera conexión como principal
-        db = dbConnections[0];
         
         // Crear tablas AI para Fase 6
         await db.exec(`
@@ -594,6 +677,7 @@ async function seedDatabaseNextGen() {
                 linkedin_url TEXT,
                 github_url TEXT,
                 profile_image TEXT,
+                status TEXT DEFAULT 'active',
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 updated_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
@@ -894,6 +978,9 @@ ${JSON.parse(profileData.education || '[]').map(edu =>
                     cost_usd: costUSD,
                     model: 'gpt-4-turbo'
                 };
+            } catch (parseError) {
+                throw new Error('Error parsing profile data: ' + parseError.message);
+            }
             },
             
             optimizeProfile: async function(userId, profileData) {
@@ -1417,8 +1504,8 @@ async function initBlockchainSystem() {
                      issue_date, credential_hash, blockchain_tx_id, verification_status)
                     VALUES (?, ?, ?, ?, ?, ?, ?, 'verified')
                 `, [
-                    userId, credentialData.type, credentialData.name,
-                    credentialData.issuer, credentialData.issueDate,
+                    userId, credentialData.credential_type, credentialData.credential_name,
+                    credentialData.issuer_name, credentialData.issue_date,
                     credentialHash, txId
                 ]);
                 

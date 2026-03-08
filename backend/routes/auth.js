@@ -1,12 +1,25 @@
 // =============================================
-// RUTAS DE AUTENTICACIÓN - LABORIA
+// RUTAS DE AUTENTICACIÓN - LABORIA FASE 6 NEXT-GEN
 // =============================================
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { pool } = require('../config/database');
 const router = express.Router();
+
+// Obtener la base de datos SQLite del servidor principal
+let db;
+const getDatabase = () => {
+    if (!db) {
+        // Intentar obtener la db del contexto global o del servidor
+        if (global.db) {
+            db = global.db;
+        } else {
+            throw new Error('Database not available');
+        }
+    }
+    return db;
+};
 
 // Middleware para validación
 const validateAuth = (req, res, next) => {
@@ -35,14 +48,15 @@ const validateAuth = (req, res, next) => {
 router.post('/register/usuario', validateAuth, async (req, res) => {
     try {
         const { username, email, password } = req.body;
+        const database = getDatabase();
         
         // Verificar si el usuario ya existe
-        const [existingUsers] = await pool.execute(
-            'SELECT id FROM usuarios WHERE email = ? OR username = ?',
+        const existingUser = await database.get(
+            'SELECT id FROM users WHERE email = ? OR username = ?',
             [email, username]
         );
         
-        if (existingUsers.length > 0) {
+        if (existingUser) {
             return res.status(400).json({
                 success: false,
                 message: 'El email o nombre de usuario ya está registrado'
@@ -54,19 +68,19 @@ router.post('/register/usuario', validateAuth, async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         
         // Insertar nuevo usuario
-        const [result] = await pool.execute(
-            'INSERT INTO usuarios (username, email, password, role, status) VALUES (?, ?, ?, ?, ?)',
+        const result = await database.run(
+            'INSERT INTO users (username, email, password, role, status) VALUES (?, ?, ?, ?, ?)',
             [username, email, hashedPassword, 'user', 'active']
         );
         
         // Generar token JWT
         const token = jwt.sign(
             { 
-                userId: result.insertId,
+                userId: result.lastID,
                 email: email,
                 role: 'user'
             },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET || 'laboria_secret_key_fase6',
             { expiresIn: '7d' }
         );
         
@@ -75,7 +89,7 @@ router.post('/register/usuario', validateAuth, async (req, res) => {
             message: 'Usuario registrado exitosamente',
             token: token,
             user: {
-                id: result.insertId,
+                id: result.lastID,
                 username: username,
                 email: email,
                 role: 'user'
@@ -96,21 +110,20 @@ router.post('/register/usuario', validateAuth, async (req, res) => {
 router.post('/login/usuario', validateAuth, async (req, res) => {
     try {
         const { email, password } = req.body;
+        const database = getDatabase();
         
         // Buscar usuario por email
-        const [users] = await pool.execute(
-            'SELECT id, username, email, password, role, status FROM usuarios WHERE email = ?',
+        const user = await database.get(
+            'SELECT id, username, email, password, role, status FROM users WHERE email = ?',
             [email]
         );
         
-        if (users.length === 0) {
+        if (!user) {
             return res.status(401).json({
                 success: false,
                 message: 'Credenciales inválidas'
             });
         }
-        
-        const user = users[0];
         
         // Verificar estado del usuario
         if (user.status !== 'active') {
@@ -129,12 +142,6 @@ router.post('/login/usuario', validateAuth, async (req, res) => {
             });
         }
         
-        // Actualizar último login
-        await pool.execute(
-            'UPDATE usuarios SET last_login = NOW() WHERE id = ?',
-            [user.id]
-        );
-        
         // Generar token JWT
         const token = jwt.sign(
             { 
@@ -142,7 +149,7 @@ router.post('/login/usuario', validateAuth, async (req, res) => {
                 email: user.email,
                 role: user.role
             },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET || 'laboria_secret_key_fase6',
             { expiresIn: '7d' }
         );
         
@@ -172,32 +179,31 @@ router.post('/login/usuario', validateAuth, async (req, res) => {
 router.post('/login/admin', validateAuth, async (req, res) => {
     try {
         const { email, password } = req.body;
+        const database = getDatabase();
         
-        // Buscar usuario con rol admin
-        const [users] = await pool.execute(
-            'SELECT id, username, email, password, role, status FROM usuarios WHERE email = ? AND role = ?',
+        // Buscar administrador por email
+        const admin = await database.get(
+            'SELECT id, username, email, password, role, status FROM users WHERE email = ? AND role = ?',
             [email, 'admin']
         );
         
-        if (users.length === 0) {
+        if (!admin) {
             return res.status(401).json({
                 success: false,
                 message: 'Credenciales de administrador inválidas'
             });
         }
         
-        const user = users[0];
-        
-        // Verificar estado del usuario
-        if (user.status !== 'active') {
+        // Verificar estado del administrador
+        if (admin.status !== 'active') {
             return res.status(401).json({
                 success: false,
-                message: 'Cuenta desactivada o suspendida'
+                message: 'Cuenta de administrador desactivada'
             });
         }
         
         // Verificar contraseña
-        const isValidPassword = await bcrypt.compare(password, user.password);
+        const isValidPassword = await bcrypt.compare(password, admin.password);
         if (!isValidPassword) {
             return res.status(401).json({
                 success: false,
@@ -205,20 +211,14 @@ router.post('/login/admin', validateAuth, async (req, res) => {
             });
         }
         
-        // Actualizar último login
-        await pool.execute(
-            'UPDATE usuarios SET last_login = NOW() WHERE id = ?',
-            [user.id]
-        );
-        
-        // Generar token JWT
+        // Generar token JWT para administrador
         const token = jwt.sign(
             { 
-                userId: user.id,
-                email: user.email,
-                role: user.role
+                userId: admin.id,
+                email: admin.email,
+                role: admin.role
             },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET || 'laboria_secret_key_fase6',
             { expiresIn: '7d' }
         );
         
@@ -227,10 +227,10 @@ router.post('/login/admin', validateAuth, async (req, res) => {
             message: 'Login de administrador exitoso',
             token: token,
             user: {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                role: user.role
+                id: admin.id,
+                username: admin.username,
+                email: admin.email,
+                role: admin.role
             }
         });
         
@@ -256,15 +256,16 @@ router.get('/verify', async (req, res) => {
             });
         }
         
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'laboria_secret_key_fase6');
+        const database = getDatabase();
         
         // Verificar que el usuario aún existe y está activo
-        const [users] = await pool.execute(
-            'SELECT id, username, email, role, status FROM usuarios WHERE id = ?',
+        const user = await database.get(
+            'SELECT id, username, email, role, status FROM users WHERE id = ?',
             [decoded.userId]
         );
         
-        if (users.length === 0 || users[0].status !== 'active') {
+        if (!user || user.status !== 'active') {
             return res.status(401).json({
                 success: false,
                 message: 'Token inválido o usuario inactivo'
@@ -275,15 +276,15 @@ router.get('/verify', async (req, res) => {
             success: true,
             message: 'Token válido',
             user: {
-                id: users[0].id,
-                username: users[0].username,
-                email: users[0].email,
-                role: users[0].role
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role
             }
         });
         
     } catch (error) {
-        console.error('Error en verificación:', error);
+        console.error('Error en verificación de token:', error);
         res.status(401).json({
             success: false,
             message: 'Token inválido'
@@ -291,14 +292,15 @@ router.get('/verify', async (req, res) => {
     }
 });
 
-// Logout (client-side mainly, but we can track if needed)
+// Logout
 router.post('/logout', async (req, res) => {
     try {
         // Aquí podríamos implementar blacklist de tokens si fuera necesario
         res.json({
             success: true,
-            message: 'Logout exitoso'
+            message: 'Sesión cerrada exitosamente'
         });
+        
     } catch (error) {
         console.error('Error en logout:', error);
         res.status(500).json({
