@@ -4,7 +4,7 @@
 
 // Configuración de la API
 const API_CONFIG = {
-    BASE_URL: (typeof window !== 'undefined' && window.location?.hostname === 'localhost') 
+    BASE_URL: (typeof window !== 'undefined' && (window.location?.hostname === 'localhost' || window.location?.hostname === '127.0.0.1')) 
         ? 'http://localhost:3000/api'
         : (typeof process !== 'undefined' && process.env.NODE_ENV === 'production' 
             ? (process.env.API_BASE_URL || 'https://laboria-api.onrender.com/api')

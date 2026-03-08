@@ -118,6 +118,7 @@ app.use(cors({
         const allowedOrigins = [
             'https://laboria.onrender.com',
             'https://laboria-api.onrender.com',
+            'https://laboria-v1.onrender.com',
             'https://api.laboria.com',
             'https://app.laboria.com',
             'https://nextgen.laboria.com',
