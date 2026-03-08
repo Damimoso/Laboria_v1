@@ -72,16 +72,17 @@ WORKDIR /app
 # Copiar archivos desde builder
 COPY --from=builder --chown=laboria:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=laboria:nodejs /app/package*.json ./
-COPY --from=builder --chown=laboria:nodejs /app/server.js ./
+COPY --from=builder --chown=laboria:nodejs /app/server-fase6.js ./
 COPY --from=builder --chown=laboria:nodejs /app/server-production.js ./
-COPY --from=builder --chown=laboria:nodejs /app/config ./config
+COPY --from=builder --chown=laboria:nodejs /app/server.js ./
 COPY --from=builder --chown=laboria:nodejs /app/routes ./routes
 COPY --from=builder --chown=laboria:nodejs /app/middleware ./middleware
 COPY --from=builder --chown=laboria:nodejs /app/websocket ./websocket
 COPY --from=builder --chown=laboria:nodejs /app/docs ./docs
+COPY --from=builder --chown=laboria:nodejs /app/.env* ./
 
 # Copiar frontend si existe
-COPY --from=builder --chown=laboria:nodejs /app/../frontend ./frontend
+COPY --from=builder --chown=laboria:nodejs /app/../frontend ./frontend/
 
 # Cambiar al usuario no root
 USER laboria
@@ -95,4 +96,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Iniciar aplicación con dumb-init
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "server-production.js"]
+CMD ["node", "server-fase6.js"]
