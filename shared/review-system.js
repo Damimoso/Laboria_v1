@@ -455,7 +455,7 @@ class ReviewSystem {
             };
             
             // Enviar a servidor
-            const response = await fetch('/api/reviews/${reviewId}/report`, {
+            const response = await fetch(`/api/reviews/${reviewId}/report`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

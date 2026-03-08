@@ -621,6 +621,12 @@
                 return;
             }
             
+            // Mostrar loading en botón
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            window.LaboriaLoading.showButtonLoading(submitBtn, {
+                content: '<i class="fas fa-spinner fa-spin"></i> Creando cuenta...'
+            });
+            
             try {
                 console.log('Intentando registrar usuario:', { username, email, fullName });
                 
@@ -632,7 +638,7 @@
                 });
                 
                 if (response.success) {
-                    console.log('Registro exitoso:', response);
+                    console.log('✅ Registro exitoso:', response);
                     
                     // Guardar tokens y datos del usuario
                     window.LaboriaAPI.usuarioActual = response.data.user;
@@ -650,7 +656,7 @@
                         window.location.href = '/usuario/perfil.html';
                     }, 1500);
                 } else {
-                    console.error('Error en registro:', response.message);
+                    console.error('❌ Error en registro:', response.message);
                     if (window.LaboriaNotifications) {
                         window.LaboriaNotifications.showNotification(response.message || 'Error en el registro', 'error');
                     } else {
@@ -658,45 +664,14 @@
                     }
                 }
             } catch (error) {
-                console.error('Error en registro:', error);
+                console.error('❌ Error en registro:', error);
                 if (window.LaboriaNotifications) {
                     window.LaboriaNotifications.showNotification('Error de conexión. Intenta nuevamente.', 'error');
                 } else {
                     alert('Error de conexión. Intenta nuevamente.');
-                
-                // Mostrar loading en botón
-                const submitBtn = event.target.querySelector('button[type="submit"]');
-                window.LaboriaLoading.showButtonLoading(submitBtn, {
-                    content: '<i class="fas fa-spinner fa-spin"></i> Creando cuenta...'
-                });
-                
-                const response = await window.LaboriaAPI.registerUsuario(formData);
-                
-                if (response.success) {
-                    console.log('✅ Registro exitoso:', response);
-                    
-                    if (window.LaboriaNotifications) {
-                        window.LaboriaNotifications.showNotification('¡Cuenta creada exitosamente! Redirigiendo...', 'success');
-                    }
-                    
-                    // Auto-login después del registro
-                    setTimeout(() => {
-                        window.location.href = '/usuario/perfil.html';
-                    }, 2000);
-                } else {
-                    console.error('❌ Error en registro:', response.message);
-                    if (window.LaboriaNotifications) {
-                        window.LaboriaNotifications.showNotification(response.message || 'Error en el registro', 'error');
-                    }
-                }
-            } catch (error) {
-                console.error('❌ Error en registro:', error);
-                if (window.LaboriaNotifications) {
-                    window.LaboriaNotifications.showNotification('Error de conexión. Intenta nuevamente.', 'error');
                 }
             } finally {
                 // Ocultar loading del botón
-                const submitBtn = event.target.querySelector('button[type="submit"]');
                 window.LaboriaLoading.hideButtonLoading(submitBtn, false);
             }
         }
