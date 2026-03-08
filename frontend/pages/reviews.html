@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Calificaciones y Reviews - Laboria</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/assets/icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Estilos Base Compartidos -->
+    <link rel="stylesheet" href="/shared/base-styles.css">
+    <link rel="stylesheet" href="/shared/responsive-styles.css">
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/accessibility-ux.css">
+    
+    <!-- Scripts compartidos -->
+    <script src="/shared/constants.js"></script>
+    <script src="/shared/device-detection.js"></script>
+    <script src="/shared/loading-system.js"></script>
+    <script src="/shared/error-handling.js"></script>
+    <script src="/shared/performance-optimizer.js"></script>
+    <script src="/shared/form-validation.js"></script>
+    <script src="/shared/ui-system.js"></script>
+    <script src="/shared/notification-system.js"></script>
+    <script src="/shared/navigation-system-clean.js"></script>
+    
+    <!-- Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
+    
+    <!-- Theme Switcher -->
+    <script src="/styles/theme-switcher.js"></script>
+    
+    <!-- Meta tags SEO -->
+    <meta name="description" content="Sistema de calificaciones y reviews de Laboria">
+    <meta name="keywords" content="calificaciones, reviews, evaluaciones, laboria">
+    <meta name="author" content="Laboria Team">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Calificaciones y Reviews - Laboria">
+    <meta property="og:description" content="Sistema completo de evaluaciones y reviews">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/assets/og-image.jpg">
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
+        font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net;
+        img-src 'self' data: https:;
+        connect-src 'self' http://localhost:3000 http://127.0.0.1:3000 http://localhost:5500 http://127.0.0.1:5500 https://cdn.jsdelivr.net https://api.openai.com https://laboria-api.onrender.com ws://localhost:3000 ws://127.0.0.1:3000 ws://localhost:5500 ws://127.0.0.1:5500;
+        frame-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+    
+    <style>
+        .reviews-container {
+            width: 100%;
+            min-height: 100vh;
+            background: var(--theme-background);
+            padding: var(--spacing-lg);
+        }
+        
+        .reviews-header {
+            margin-bottom: var(--spacing-2xl);
+            text-align: center;
+        }
+        
+        .reviews-title {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            color: var(--theme-text-primary);
+            margin-bottom: var(--spacing-md);
+            background: var(--theme-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .reviews-subtitle {
+            color: var(--theme-text-secondary);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .review-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .review-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .review-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+        
+        .reviewer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--theme-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: var(--font-size-lg);
+            flex-shrink: 0;
+        }
+        
+        .reviewer-details {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .reviewer-name {
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .reviewer-role {
+            font-size: var(--font-size-sm);
+            color: var(--theme-text-secondary);
+        }
+        
+        .review-date {
+            font-size: var(--font-size-sm);
+            color: var(--theme-text-secondary);
+        }
+        
+        .review-rating {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .star-rating {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .star {
+            font-size: var(--font-size-xl);
+            color: #d1d5db;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .star.filled {
+            color: #fbbf24;
+        }
+        
+        .star.half-filled {
+            background: linear-gradient(90deg, #fbbf24 50%, #d1d5db 50%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .star:hover {
+            transform: scale(1.1);
+        }
+        
+        .rating-number {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            margin-left: var(--spacing-sm);
+        }
+        
+        .review-content {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .review-text {
+            color: var(--theme-text-primary);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-md);
+            white-space: pre-wrap;
+        }
+        
+        .review-title {
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            margin-bottom: var(--spacing-sm);
+            font-size: var(--font-size-lg);
+        }
+        
+        .review-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            font-size: var(--font-size-sm);
+            color: var(--theme-text-secondary);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .review-meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .review-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+        
+        .review-action-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--theme-primary);
+            background: transparent;
+            color: var(--theme-primary);
+            border-radius: var(--border-radius-md);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .review-action-btn:hover {
+            background: var(--theme-primary);
+            color: white;
+        }
+        
+        .review-action-btn.danger {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        
+        .review-action-btn.danger:hover {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .write-review-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .write-review-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .write-review-title {
+            font-size: var(--font-size-2xl);
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .review-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius-md);
+            font-size: var(--font-size-base);
+            line-height: 1.5;
+            outline: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--theme-text-primary);
+        }
+        
+        .form-input:focus,
+        .form-textarea:focus {
+            border-color: var(--theme-primary);
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .rating-input {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .rating-stars {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+        
+        .rating-stars .star {
+            font-size: var(--font-size-2xl);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .rating-stars .star:hover {
+            transform: scale(1.2);
+        }
+        
+        .rating-value {
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            margin-left: var(--spacing-sm);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: var(--theme-primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-md);
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            background: var(--theme-secondary);
+            transform: translateY(-1px);
+        }
+        
+        .submit-btn:disabled {
+            background: var(--theme-text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .filters-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .filters-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .filters-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            color: var(--theme-text-primary);
+        }
+        
+        .filters-controls {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+        
+        .filter-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: transparent;
+            color: var(--theme-text-secondary);
+            border-radius: var(--border-radius-md);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover {
+            border-color: var(--theme-primary);
+            color: var(--theme-primary);
+        }
+        
+        .filter-btn.active {
+            background: var(--theme-primary);
+            color: white;
+            border-color: var(--theme-primary);
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .filter-select {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius-md);
+            font-size: var(--font-size-base);
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--theme-text-primary);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-select:focus {
+            border-color: var(--theme-primary);
+        }
+        
+        .stats-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: var(--spacing-lg);
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: var(--border-radius-md);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .stat-value {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            color: var(--theme-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .stat-label {
+            font-size: var(--font-size-sm);
+            color: var(--theme-text-secondary);
+            font-weight: 500;
+        }
+        
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading-shimmer 1.5s infinite;
+            border-radius: var(--border-radius-md);
+        }
+        
+        @keyframes loading-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .reviews-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: var(--spacing-lg);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .reviews-container {
+                padding: var(--spacing-md);
+            }
+            
+            .reviews-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+            
+            .review-card {
+                padding: var(--spacing-lg);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .reviews-container {
+                padding: var(--spacing-sm);
+            }
+            
+            .review-card {
+                padding: var(--spacing-md);
+            }
+            
+            .review-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-sm);
+            }
+            
+            .reviewer-info {
+                width: 100%;
+            }
+            
+            .write-review-section {
+                padding: var(--spacing-lg);
+            }
+        }
+        
+        /* Dark mode */
+        @media (prefers-color-scheme: dark) {
+            .review-card,
+            .write-review-section,
+            .filters-section,
+            .stats-section {
+                background: rgba(26, 26, 26, 0.95);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .form-input,
+            .form-textarea,
+            .filter-select {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+            
+            .form-input:focus,
+            .form-textarea:focus,
+            .filter-select:focus {
+                background: rgba(255, 255, 255, 0.2);
+                border-color: var(--theme-primary);
+            }
+            
+            .loading-skeleton {
+                background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+                background-size: 200% 100%;
+            }
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .review-card,
+            .star,
+            .review-action-btn,
+            .filter-btn {
+                transition: none;
+            }
+            
+            .loading-skeleton {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip link para accesibilidad -->
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+    
+    <div class="main-container">
+        <!-- Animated Background -->
+        <div class="animated-bg">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+                <div class="shape shape-4"></div>
+                <div class="shape shape-5"></div>
+            </div>
+        </div>
+        
+        <!-- Contenedor principal -->
+        <div class="centered-container">
+            <div class="reviews-container" id="main-content">
+                <!-- Header -->
+                <header class="reviews-header">
+                    <h1 class="reviews-title">Calificaciones y Reviews</h1>
+                    <p class="reviews-subtitle">Sistema completo de evaluaciones y reseñas</p>
+                </header>
+                
+                <!-- Sección de Estadísticas -->
+                <section class="stats-section" id="statsSection">
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- Las estadísticas se cargarán dinámicamente -->
+                        <div class="stat-card loading-skeleton">
+                            <div class="stat-value">--</div>
+                            <div class="stat-label">Total Reviews</div>
+                        </div>
+                        <div class="stat-card loading-skeleton">
+                            <div class="stat-value">--</div>
+                            <div class="stat-label">Promedio</div>
+                        </div>
+                        <div class="stat-card loading-skeleton">
+                            <div class="stat-value">--</div>
+                            <div class="stat-label">5 Estrellas</div>
+                        </div>
+                        <div class="stat-card loading-skeleton">
+                            <div class="stat-value">--</div>
+                            <div class="stat-label">Este Mes</div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Sección de Filtros -->
+                <section class="filters-section" id="filtersSection">
+                    <div class="filters-header">
+                        <h2 class="filters-title">
+                            <i class="fas fa-filter"></i>
+                            Filtros
+                        </h2>
+                        <div class="filters-controls">
+                            <button class="filter-btn" onclick="clearFilters()">
+                                <i class="fas fa-times"></i>
+                                Limpiar
+                            </button>
+                            <button class="filter-btn" onclick="toggleAdvancedFilters()">
+                                <i class="fas fa-cog"></i>
+                                Avanzado
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <select class="filter-select" id="ratingFilter" onchange="applyFilters()">
+                            <option value="">Todas las calificaciones</option>
+                            <option value="5">5 estrellas</option>
+                            <option value="4">4 estrellas</option>
+                            <option value="3">3 estrellas</option>
+                            <option value="2">2 estrellas</option>
+                            <option value="1">1 estrella</option>
+                        </select>
+                        
+                        <select class="filter-select" id="dateFilter" onchange="applyFilters()">
+                            <option value="">Todas las fechas</option>
+                            <option value="today">Hoy</option>
+                            <option value="week">Esta semana</option>
+                            <option value="month">Este mes</option>
+                            <option value="year">Este año</option>
+                        </select>
+                        
+                        <select class="filter-select" id="sortBy" onchange="applyFilters()">
+                            <option value="date">Más recientes</option>
+                            <option value="rating">Mejor calificadas</option>
+                            <option value="helpful">Más útiles</option>
+                        </select>
+                    </div>
+                </section>
+                
+                <!-- Sección de Reviews -->
+                <section class="reviews-section">
+                    <div class="reviews-grid" id="reviewsGrid">
+                        <!-- Los reviews se cargarán dinámicamente -->
+                        <div class="review-card loading-skeleton">
+                            <div class="review-header">
+                                <div class="reviewer-info">
+                                    <div class="reviewer-avatar loading-skeleton"></div>
+                                    <div class="reviewer-details">
+                                        <div class="reviewer-name loading-skeleton">Cargando...</div>
+                                        <div class="reviewer-role loading-skeleton">...</div>
+                                    </div>
+                                </div>
+                                <div class="review-date loading-skeleton">...</div>
+                            </div>
+                            <div class="review-rating">
+                                <div class="star-rating loading-skeleton">★★★★★</div>
+                                <div class="rating-number loading-skeleton">--</div>
+                            </div>
+                            <div class="review-content">
+                                <div class="review-text loading-skeleton">Cargando review...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón de cargar más -->
+                    <div style="text-align: center; margin-top: var(--spacing-xl);">
+                        <button class="review-action-btn" id="loadMoreBtn" onclick="loadMoreReviews()" style="display: none;">
+                            <i class="fas fa-plus"></i>
+                            Cargar más reviews
+                        </button>
+                    </div>
+                </section>
+                
+                <!-- Sección de Escribir Review -->
+                <section class="write-review-section" id="writeReviewSection">
+                    <div class="write-review-header">
+                        <h2 class="write-review-title">
+                            <i class="fas fa-star"></i>
+                            Escribir una Review
+                        </h2>
+                    </div>
+                    
+                    <form class="review-form" id="reviewForm" onsubmit="submitReview(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="reviewTarget">¿Qué estás calificando?</label>
+                            <select class="form-input" id="reviewTarget" required>
+                                <option value="">Selecciona...</option>
+                                <option value="company">Empresa</option>
+                                <option value="job">Oferta laboral</option>
+                                <option value="user">Usuario</option>
+                                <option value="platform">Plataforma Laboria</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="reviewTitle">Título de la Review</label>
+                            <input type="text" class="form-input" id="reviewTitle" placeholder="Resume tu experiencia en una frase" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="reviewRating">Calificación</label>
+                            <div class="rating-input">
+                                <div class="rating-stars" id="ratingStars">
+                                    <span class="star" data-rating="1" onclick="setRating(1)">★</span>
+                                    <span class="star" data-rating="2" onclick="setRating(2)">★</span>
+                                    <span class="star" data-rating="3" onclick="setRating(3)">★</span>
+                                    <span class="star" data-rating="4" onclick="setRating(4)">★</span>
+                                    <span class="star" data-rating="5" onclick="setRating(5)">★</span>
+                                </div>
+                                <div class="rating-value" id="ratingValue">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="reviewText">Tu Review</label>
+                            <textarea class="form-textarea" id="reviewText" placeholder="Comparte tu experiencia detallada..." required rows="5"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="reviewPros">Puntos Positivos</label>
+                            <textarea class="form-textarea" id="reviewPros" placeholder="¿Qué te gustó más?" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="reviewCons">Puntos a Mejorar</label>
+                            <textarea class="form-textarea" id="reviewCons" placeholder="¿Qué se podría mejorar?" rows="3"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            Enviar Review
+                        </button>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Estado del sistema de reviews
+        let reviewsState = {
+            reviews: [],
+            stats: {},
+            filters: {
+                rating: '',
+                date: '',
+                sortBy: 'date'
+            },
+            currentPage: 1,
+            totalPages: 1,
+            isLoading: false,
+            currentRating: 0
+        };
+        
+        // Inicialización cuando el DOM está listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('⭐ Inicializando Sistema de Reviews...');
+            
+            // Verificar autenticación
+            if (!window.LaboriaAPI?.isAuthenticated()) {
+                window.location.href = '/pages/index.html';
+                return;
+            }
+            
+            // Cargar datos iniciales
+            loadInitialData();
+            
+            // Configurar listeners
+            setupEventListeners();
+            
+            console.log('✅ Sistema de Reviews inicializado');
+        });
+        
+        // Cargar datos iniciales
+        async function loadInitialData() {
+            try {
+                // Mostrar loading
+                showLoading();
+                
+                // Cargar estadísticas
+                await loadStats();
+                
+                // Cargar reviews
+                await loadReviews();
+                
+                // Ocultar loading
+                hideLoading();
+                
+            } catch (error) {
+                console.error('❌ Error cargando datos iniciales:', error);
+                showError('Error cargando los datos');
+                hideLoading();
+            }
+        }
+        
+        // Cargar estadísticas
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/reviews/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    reviewsState.stats = data.stats;
+                    displayStats();
+                }
+            } catch (error) {
+                console.error('❌ Error cargando estadísticas:', error);
+            }
+        }
+        
+        // Cargar reviews
+        async function loadReviews(page = 1) {
+            try {
+                reviewsState.isLoading = true;
+                updateLoadMoreButton();
+                
+                const params = new URLSearchParams({
+                    page: page,
+                    rating: reviewsState.filters.rating,
+                    date: reviewsState.filters.date,
+                    sortBy: reviewsState.filters.sortBy
+                });
+                
+                const response = await fetch(`/api/reviews?${params}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (page === 1) {
+                        reviewsState.reviews = data.reviews;
+                    } else {
+                        reviewsState.reviews.push(...data.reviews);
+                    }
+                    
+                    reviewsState.currentPage = page;
+                    reviewsState.totalPages = data.totalPages;
+                    
+                    displayReviews();
+                    updateLoadMoreButton();
+                }
+            } catch (error) {
+                console.error('❌ Error cargando reviews:', error);
+            } finally {
+                reviewsState.isLoading = false;
+            }
+        }
+        
+        // Mostrar estadísticas
+        function displayStats() {
+            const statsGrid = document.getElementById('statsGrid');
+            
+            const statsHTML = [
+                {
+                    value: reviewsState.stats.totalReviews || 0,
+                    label: 'Total Reviews'
+                },
+                {
+                    value: reviewsState.stats.averageRating ? reviewsState.stats.averageRating.toFixed(1) : '0.0',
+                    label: 'Promedio'
+                },
+                {
+                    value: reviewsState.stats.fiveStarReviews || 0,
+                    label: '5 Estrellas'
+                },
+                {
+                    value: reviewsState.stats.thisMonth || 0,
+                    label: 'Este Mes'
+                }
+            ].map(stat => createStatCard(stat)).join('');
+            
+            statsGrid.innerHTML = statsHTML;
+        }
+        
+        // Crear tarjeta de estadística
+        function createStatCard(stat) {
+            return `
+                <div class="stat-card">
+                    <div class="stat-value">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                </div>
+            `;
+        }
+        
+        // Mostrar reviews
+        function displayReviews() {
+            const reviewsGrid = document.getElementById('reviewsGrid');
+            
+            if (reviewsState.reviews.length === 0) {
+                reviewsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                        <div style="font-size: 3rem; color: var(--theme-text-secondary); margin-bottom: 1rem;">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h3 style="color: var(--theme-text-primary); margin-bottom: 1rem;">No hay reviews aún</h3>
+                        <p style="color: var(--theme-text-secondary);">Sé el primero en compartir tu experiencia</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const reviewsHTML = reviewsState.reviews.map(review => createReviewCard(review)).join('');
+            reviewsGrid.innerHTML = reviewsHTML;
+        }
+        
+        // Crear tarjeta de review
+        function createReviewCard(review) {
+            const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            const formattedDate = new Date(review.createdAt).toLocaleDateString('es-ES');
+            
+            return `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <div class="reviewer-avatar">${review.reviewerName ? review.reviewerName.charAt(0).toUpperCase() : 'A'}</div>
+                            <div class="reviewer-details">
+                                <div class="reviewer-name">${review.reviewerName || 'Anónimo'}</div>
+                                <div class="reviewer-role">${review.reviewerRole || 'Usuario'}</div>
+                            </div>
+                        </div>
+                        <div class="review-date">${formattedDate}</div>
+                    </div>
+                    
+                    <div class="review-rating">
+                        <div class="star-rating">${stars}</div>
+                        <div class="rating-number">${review.rating.toFixed(1)}</div>
+                    </div>
+                    
+                    <div class="review-content">
+                        ${review.title ? `<div class="review-title">${review.title}</div>` : ''}
+                        <div class="review-text">${review.content}</div>
+                        
+                        ${review.pros || review.cons ? `
+                            <div class="review-meta">
+                                ${review.pros ? `
+                                    <div class="review-meta-item">
+                                        <i class="fas fa-thumbs-up" style="color: #10b981;"></i>
+                                        <span>Puntos positivos: ${review.pros}</span>
+                                    </div>
+                                ` : ''}
+                                ${review.cons ? `
+                                    <div class="review-meta-item">
+                                        <i class="fas fa-thumbs-down" style="color: #ef4444;"></i>
+                                        <span>A mejorar: ${review.cons}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="review-actions">
+                        <button class="review-action-btn" onclick="markHelpful('${review.id}')">
+                            <i class="fas fa-thumbs-up"></i>
+                            Útil (${review.helpfulCount || 0})
+                        </button>
+                        <button class="review-action-btn" onclick="reportReview('${review.id}')">
+                            <i class="fas fa-flag"></i>
+                            Reportar
+                        </button>
+                        ${review.canEdit ? `
+                            <button class="review-action-btn" onclick="editReview('${review.id}')">
+                                <i class="fas fa-edit"></i>
+                                Editar
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Configurar calificación
+        function setRating(rating) {
+            reviewsState.currentRating = rating;
+            updateRatingDisplay();
+        }
+        
+        // Actualizar display de calificación
+        function updateRatingDisplay() {
+            const stars = document.querySelectorAll('#ratingStars .star');
+            const ratingValue = document.getElementById('ratingValue');
+            
+            stars.forEach((star, index) => {
+                const starRating = parseInt(star.dataset.rating);
+                if (starRating <= reviewsState.currentRating) {
+                    star.classList.add('filled');
+                    star.classList.remove('half-filled');
+                } else {
+                    star.classList.remove('filled', 'half-filled');
+                }
+            });
+            
+            ratingValue.textContent = reviewsState.currentRating;
+        }
+        
+        // Enviar review
+        async function submitReview(event) {
+            event.preventDefault();
+            
+            try {
+                const formData = {
+                    target: document.getElementById('reviewTarget').value,
+                    title: document.getElementById('reviewTitle').value.trim(),
+                    rating: reviewsState.currentRating,
+                    content: document.getElementById('reviewText').value.trim(),
+                    pros: document.getElementById('reviewPros').value.trim(),
+                    cons: document.getElementById('reviewCons').value.trim()
+                };
+                
+                // Validar formulario
+                if (!validateReviewForm(formData)) {
+                    return;
+                }
+                
+                // Mostrar loading en botón
+                const submitBtn = document.getElementById('submitBtn');
+                showButtonLoading(submitBtn);
+                
+                // Enviar review
+                const response = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Limpiar formulario
+                    document.getElementById('reviewForm').reset();
+                    reviewsState.currentRating = 0;
+                    updateRatingDisplay();
+                    
+                    // Mostrar notificación
+                    if (window.LaboriaNotifications) {
+                        window.LaboriaNotifications.showNotification('Review enviada exitosamente', 'success');
+                    }
+                    
+                    // Recargar reviews
+                    await loadReviews();
+                    
+                    // Recargar estadísticas
+                    await loadStats();
+                    
+                } else {
+                    throw new Error(data.message || 'Error enviando review');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error enviando review:', error);
+                if (window.LaboriaNotifications) {
+                    window.LaboriaNotifications.showNotification('Error enviando review', 'error');
+                }
+            } finally {
+                // Ocultar loading del botón
+                const submitBtn = document.getElementById('submitBtn');
+                hideButtonLoading(submitBtn);
+            }
+        }
+        
+        // Validar formulario
+        function validateReviewForm(formData) {
+            if (!formData.target) {
+                if (window.LaboriaNotifications) {
+                    window.LaboriaNotifications.showNotification('Selecciona qué estás calificando', 'error');
+                }
+                return false;
+            }
+            
+            if (!formData.title || formData.title.length < 5) {
+                if (window.LaboriaNotifications) {
+                    window.LaboriaNotifications.showNotification('El título debe tener al menos 5 caracteres', 'error');
+                }
+                return false;
+            }
+            
+            if (formData.rating === 0) {
+                if (window.LaboriaNotifications) {
+                    window.LaboriaNotifications.showNotification('Selecciona una calificación', 'error');
+                }
+                return false;
+            }
+            
+            if (!formData.content || formData.content.length < 10) {
+                if (window.LaboriaNotifications) {
+                    window.LaboriaNotifications.showNotification('La review debe tener al menos 10 caracteres', 'error');
+                }
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Aplicar filtros
+        function applyFilters() {
+            reviewsState.filters.rating = document.getElementById('ratingFilter').value;
+            reviewsState.filters.date = document.getElementById('dateFilter').value;
+            reviewsState.filters.sortBy = document.getElementById('sortBy').value;
+            
+            // Recargar reviews con filtros
+            loadReviews(1);
+        }
+        
+        // Limpiar filtros
+        function clearFilters() {
+            document.getElementById('ratingFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('sortBy').value = 'date';
+            
+            applyFilters();
+        }
+        
+        // Toggle filtros avanzados
+        function toggleAdvancedFilters() {
+            console.log('🔧 Toggle filtros avanzados');
+            // Implementar filtros avanzados adicionales
+        }
+        
+        // Cargar más reviews
+        async function loadMoreReviews() {
+            if (reviewsState.isLoading || reviewsState.currentPage >= reviewsState.totalPages) {
+                return;
+            }
+            
+            await loadReviews(reviewsState.currentPage + 1);
+        }
+        
+        // Actualizar botón de cargar más
+        function updateLoadMoreButton() {
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            
+            if (reviewsState.currentPage >= reviewsState.totalPages) {
+                loadMoreBtn.style.display = 'none';
+            } else if (reviewsState.isLoading) {
+                loadMoreBtn.style.display = 'block';
+                loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+                loadMoreBtn.disabled = true;
+            } else {
+                loadMoreBtn.style.display = 'block';
+                loadMoreBtn.innerHTML = '<i class="fas fa-plus"></i> Cargar más reviews';
+                loadMoreBtn.disabled = false;
+            }
+        }
+        
+        // Marcar review como útil
+        async function markHelpful(reviewId) {
+            try {
+                const response = await fetch(`/api/reviews/${reviewId}/helpful`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    // Actualizar contador localmente
+                    const review = reviewsState.reviews.find(r => r.id === reviewId);
+                    if (review) {
+                        review.helpfulCount = (review.helpfulCount || 0) + 1;
+                        displayReviews();
+                    }
+                    
+                    if (window.LaboriaNotifications) {
+                        window.LaboriaNotifications.showNotification('¡Gracias por tu feedback!', 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error marcando review como útil:', error);
+            }
+        }
+        
+        // Reportar review
+        async function reportReview(reviewId) {
+            const reason = prompt('¿Por qué quieres reportar esta review?');
+            
+            if (!reason) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/reviews/${reviewId}/report`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason })
+                });
+                
+                if (response.ok) {
+                    if (window.LaboriaNotifications) {
+                        window.LaboriaNotifications.showNotification('Review reportada exitosamente', 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error reportando review:', error);
+            }
+        }
+        
+        // Editar review
+        function editReview(reviewId) {
+            console.log('✏️ Editar review:', reviewId);
+            // Implementar modal de edición
+        }
+        
+        // Configurar listeners de eventos
+        function setupEventListeners() {
+            // Listener de scroll para cargar más
+            window.addEventListener('scroll', () => {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+                    loadMoreReviews();
+                }
+            });
+        }
+        
+        // UI Helper functions
+        function showLoading() {
+            window.LaboriaLoading.showGlobalLoading('Cargando reviews...');
+        }
+        
+        function hideLoading() {
+            window.LaboriaLoading.hideGlobalLoading();
+        }
+        
+        function showButtonLoading(button) {
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            button.disabled = true;
+            button.dataset.originalContent = originalContent;
+        }
+        
+        function hideButtonLoading(button) {
+            const originalContent = button.dataset.originalContent;
+            button.innerHTML = originalContent;
+            button.disabled = false;
+            delete button.dataset.originalContent;
+        }
+        
+        function showError(message) {
+            if (window.LaboriaNotifications) {
+                window.LaboriaNotifications.showNotification(message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
