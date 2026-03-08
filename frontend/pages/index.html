@@ -31,6 +31,7 @@
     <script src="/shared/ui-system.js"></script>
     <script src="/shared/notification-system.js"></script>
     <script src="/shared/navigation-system-clean.js"></script>
+    <script src="/shared/form-validation.js"></script>
     
     <!-- Font Awesome -->
     <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
@@ -353,25 +354,25 @@
                     
                     <form id="userLoginForm" class="modern-form">
                         <div class="form-group">
-                            <label for="userEmail">Email</label>
-                            <div class="form-input-wrapper">
-                                <i class="fas fa-envelope form-input-icon"></i>
-                                <input type="email" id="userEmail" class="form-input" placeholder="tu@email.com" required>
-                            </div>
+                            <label for="userEmail" class="form-label">Email</label>
+                            <input type="email" id="userEmail" name="email" class="form-input" placeholder="tu@email.com" 
+                                   data-validate="required|email" data-label="Email" required>
+                            <div class="field-feedback" id="userEmail-feedback"></div>
                         </div>
                         
                         <div class="form-group">
-                            <label for="userPassword">Contraseña</label>
-                            <div class="form-input-wrapper">
-                                <i class="fas fa-lock form-input-icon"></i>
-                                <input type="password" id="userPassword" class="form-input" placeholder="Tu contraseña" required>
+                            <label for="userPassword" class="form-label">Contraseña</label>
+                            <div class="password-input-container">
+                                <input type="password" id="userPassword" name="password" class="form-input" placeholder="Tu contraseña" 
+                                       data-validate="required" data-label="Contraseña" required>
                                 <button type="button" class="toggle-password" data-target="userPassword">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
-                            <div style="margin-top: 0.5rem; text-align: right;">
-                                <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
-                            </div>
+                            <div class="field-feedback" id="userPassword-feedback"></div>
+                        </div>
+                        <div style="margin-top: 0.5rem; text-align: right;">
+                            <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
                         </div>
                         
                         <button type="submit" class="btn-primary">
@@ -416,22 +417,22 @@
                     
                     <form id="adminLoginForm" class="modern-form">
                         <div class="form-group">
-                            <label for="adminEmail">Email Admin</label>
-                            <div class="form-input-wrapper">
-                                <i class="fas fa-user-shield form-input-icon"></i>
-                                <input type="email" id="adminEmail" class="form-input" placeholder="admin@laboria.com" required>
-                            </div>
+                            <label for="adminEmail" class="form-label">Email</label>
+                            <input type="email" id="adminEmail" name="email" class="form-input" placeholder="admin@laboria.com" 
+                                   data-validate="required|email" data-label="Email" required>
+                            <div class="field-feedback" id="adminEmail-feedback"></div>
                         </div>
                         
                         <div class="form-group">
-                            <label for="adminPassword">Contraseña Admin</label>
-                            <div class="form-input-wrapper">
-                                <i class="fas fa-lock form-input-icon"></i>
-                                <input type="password" id="adminPassword" class="form-input" placeholder="Contraseña de administrador" required>
+                            <label for="adminPassword" class="form-label">Contraseña</label>
+                            <div class="password-input-container">
+                                <input type="password" id="adminPassword" name="password" class="form-input" placeholder="Tu contraseña de administrador" 
+                                       data-validate="required" data-label="Contraseña" required>
                                 <button type="button" class="toggle-password" data-target="adminPassword">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
+                            <div class="field-feedback" id="adminPassword-feedback"></div>
                         </div>
                         
                         <button type="submit" class="btn-primary">
@@ -480,51 +481,48 @@
             registerForm.className = 'modern-form';
             registerForm.innerHTML = `
                 <div class="form-group">
-                    <label for="registerUsername">Nombre de Usuario</label>
-                    <div class="form-input-wrapper">
-                        <i class="fas fa-user form-input-icon"></i>
-                        <input type="text" id="registerUsername" class="form-input" name="username" required 
-                               placeholder="Elige un nombre de usuario">
-                    </div>
+                    <label for="registerFullName" class="form-label">Nombre Completo</label>
+                    <input type="text" id="registerFullName" name="fullName" class="form-input" placeholder="Tu nombre completo" 
+                           data-validate="required|names|minLength:2" data-label="Nombre completo" required>
+                    <div class="field-feedback" id="registerFullName-feedback"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="registerEmail">Email</label>
-                    <div class="form-input-wrapper">
-                        <i class="fas fa-envelope form-input-icon"></i>
-                        <input type="email" id="registerEmail" class="form-input" name="email" required 
-                               placeholder="tu@email.com">
-                    </div>
+                    <label for="registerUsername" class="form-label">Nombre de Usuario</label>
+                    <input type="text" id="registerUsername" name="username" class="form-input" placeholder="Tu nombre de usuario" 
+                           data-validate="required|alphanumeric|minLength:3" data-label="Nombre de usuario" required>
+                    <div class="field-feedback" id="registerUsername-feedback"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="registerPassword">Contraseña</label>
-                    <div class="form-input-wrapper">
-                        <i class="fas fa-lock form-input-icon"></i>
-                        <input type="password" id="registerPassword" class="form-input" name="password" required 
-                               placeholder="Mínimo 8 caracteres">
+                    <label for="registerEmail" class="form-label">Email</label>
+                    <input type="email" id="registerEmail" name="email" class="form-input" placeholder="tu@email.com" 
+                           data-validate="required|email" data-label="Email" required>
+                    <div class="field-feedback" id="registerEmail-feedback"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPassword" class="form-label">Contraseña</label>
+                    <div class="password-input-container">
+                        <input type="password" id="registerPassword" name="password" class="form-input" placeholder="Mínimo 8 caracteres" 
+                               data-validate="required|minLength:8|strength" data-label="Contraseña" required>
                         <button type="button" class="toggle-password" data-target="registerPassword">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
+                    <div class="field-feedback" id="registerPassword-feedback"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="registerConfirmPassword">Confirmar Contraseña</label>
-                    <div class="form-input-wrapper">
-                        <i class="fas fa-lock form-input-icon"></i>
-                        <input type="password" id="registerConfirmPassword" class="form-input" name="confirmPassword" required 
-                               placeholder="Repite tu contraseña">
+                    <label for="registerConfirmPassword" class="form-label">Confirmar Contraseña</label>
+                    <div class="password-input-container">
+                        <input type="password" id="registerConfirmPassword" name="confirmPassword" class="form-input" placeholder="Repite tu contraseña" 
+                               data-validate="required|match:registerPassword" data-label="Confirmar contraseña" required>
                         <button type="button" class="toggle-password" data-target="registerConfirmPassword">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="registerFullName">Nombre Completo (Opcional)</label>
-                    <div class="form-input-wrapper">
-                        <i class="fas fa-id-card form-input-icon"></i>
+                    <div class="field-feedback" id="registerConfirmPassword-feedback"></div>
                         <input type="text" id="registerFullName" class="form-input" name="fullName" 
                                placeholder="Tu nombre completo">
                     </div>
