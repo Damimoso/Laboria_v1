@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Dashboard Analítico - Laboria</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/assets/icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Estilos Base Compartidos -->
+    <link rel="stylesheet" href="/shared/base-styles.css">
+    <link rel="stylesheet" href="/shared/responsive-styles.css">
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/accessibility-ux.css">
+    
+    <!-- Scripts compartidos -->
+    <script src="/shared/constants.js"></script>
+    <script src="/shared/device-detection.js"></script>
+    <script src="/shared/loading-system.js"></script>
+    <script src="/shared/error-handling.js"></script>
+    <script src="/shared/performance-optimizer.js"></script>
+    <script src="/shared/form-validation.js"></script>
+    <script src="/shared/ui-system.js"></script>
+    <script src="/shared/notification-system.js"></script>
+    <script src="/shared/navigation-system-clean.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
+    
+    <!-- Theme Switcher -->
+    <script src="/styles/theme-switcher.js"></script>
+    
+    <!-- Meta tags SEO -->
+    <meta name="description" content="Dashboard analítico avanzado de Laboria - Métricas en tiempo real">
+    <meta name="keywords" content="dashboard, analytics, metrics, laboria">
+    <meta name="author" content="Laboria Team">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Dashboard Analítico - Laboria">
+    <meta property="og:description" content="Métricas y analytics en tiempo real">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/assets/og-image.jpg">
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
+        font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net;
+        img-src 'self' data: https:;
+        connect-src 'self' http://localhost:3000 http://127.0.0.1:3000 http://localhost:5500 http://127.0.0.1:5500 https://cdn.jsdelivr.net https://api.openai.com https://laboria-api.onrender.com ws://localhost:3000 ws://127.0.0.1:3000 ws://localhost:5500 ws://127.0.0.1:5500;
+        frame-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+    
+    <style>
+        .dashboard-container {
+            width: 100%;
+            min-height: 100vh;
+            background: var(--theme-background);
+            padding: var(--spacing-lg);
+        }
+        
+        .dashboard-header {
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .dashboard-title {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            color: var(--theme-text-primary);
+            margin-bottom: var(--spacing-md);
+            background: var(--theme-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .dashboard-subtitle {
+            color: var(--theme-text-secondary);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--theme-gradient);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        }
+        
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .metric-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--border-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-lg);
+        }
+        
+        .metric-icon.blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        
+        .metric-icon.green {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .metric-icon.purple {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+        
+        .metric-icon.orange {
+            background: rgba(251, 146, 60, 0.1);
+            color: #fb923c;
+        }
+        
+        .metric-value {
+            font-size: var(--font-size-4xl);
+            font-weight: 700;
+            color: var(--theme-text-primary);
+            margin-bottom: var(--spacing-sm);
+            line-height: 1;
+        }
+        
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+        }
+        
+        .metric-change.positive {
+            color: #10b981;
+        }
+        
+        .metric-change.negative {
+            color: #ef4444;
+        }
+        
+        .metric-description {
+            color: var(--theme-text-secondary);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-md);
+        }
+        
+        .chart-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .chart-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            color: var(--theme-text-primary);
+        }
+        
+        .chart-controls {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+        
+        .chart-control {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--theme-primary);
+            background: transparent;
+            color: var(--theme-primary);
+            border-radius: var(--border-radius-md);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-control:hover {
+            background: var(--theme-primary);
+            color: white;
+        }
+        
+        .chart-control.active {
+            background: var(--theme-primary);
+            color: white;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--spacing-xl);
+        }
+        
+        .activity-feed {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .activity-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .activity-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            color: var(--theme-text-primary);
+        }
+        
+        .activity-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--border-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-base);
+            flex-shrink: 0;
+        }
+        
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            margin-bottom: var(--spacing-xs);
+            font-size: var(--font-size-sm);
+        }
+        
+        .activity-description {
+            color: var(--theme-text-secondary);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .activity-time {
+            color: var(--theme-text-secondary);
+            font-size: var(--font-size-xs);
+            white-space: nowrap;
+        }
+        
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading-shimmer 1.5s infinite;
+            border-radius: var(--border-radius-md);
+        }
+        
+        @keyframes loading-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: var(--spacing-lg);
+            }
+            
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: var(--spacing-md);
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+            
+            .metric-card {
+                padding: var(--spacing-lg);
+            }
+            
+            .chart-section {
+                padding: var(--spacing-lg);
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            .activity-feed {
+                padding: var(--spacing-lg);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: var(--spacing-sm);
+            }
+            
+            .dashboard-title {
+                font-size: var(--font-size-2xl);
+            }
+            
+            .metric-value {
+                font-size: var(--font-size-3xl);
+            }
+            
+            .chart-controls {
+                flex-wrap: wrap;
+            }
+            
+            .chart-control {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-sm);
+            }
+        }
+        
+        /* Dark mode */
+        @media (prefers-color-scheme: dark) {
+            .metric-card,
+            .chart-section,
+            .activity-feed {
+                background: rgba(26, 26, 26, 0.95);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .loading-skeleton {
+                background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+                background-size: 200% 100%;
+            }
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .metric-card,
+            .chart-control {
+                transition: none;
+            }
+            
+            .loading-skeleton {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip link para accesibilidad -->
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+    
+    <div class="main-container">
+        <!-- Animated Background -->
+        <div class="animated-bg">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+                <div class="shape shape-4"></div>
+                <div class="shape shape-5"></div>
+            </div>
+        </div>
+        
+        <!-- Contenedor principal -->
+        <div class="centered-container">
+            <div class="dashboard-container" id="main-content">
+                <!-- Header del Dashboard -->
+                <header class="dashboard-header">
+                    <h1 class="dashboard-title">Dashboard Analítico</h1>
+                    <p class="dashboard-subtitle">Métricas en tiempo real y análisis avanzado</p>
+                </header>
+                
+                <!-- Grid de Métricas -->
+                <section class="dashboard-grid" id="metricsGrid">
+                    <!-- Métricas se cargarán dinámicamente -->
+                    <div class="metric-card loading-skeleton">
+                        <div class="metric-header">
+                            <div class="metric-title">Cargando...</div>
+                            <div class="metric-icon loading-skeleton"></div>
+                        </div>
+                        <div class="metric-value loading-skeleton">--</div>
+                        <div class="metric-change loading-skeleton">--</div>
+                    </div>
+                </section>
+                
+                <!-- Sección de Gráficos -->
+                <section class="chart-grid" id="chartsGrid">
+                    <!-- Gráficos se cargarán dinámicamente -->
+                    <div class="chart-section loading-skeleton">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Cargando...</h2>
+                            <div class="chart-controls">
+                                <button class="chart-control loading-skeleton">...</button>
+                            </div>
+                        </div>
+                        <div class="chart-container loading-skeleton"></div>
+                    </div>
+                </section>
+                
+                <!-- Feed de Actividad -->
+                <section class="activity-feed" id="activityFeed">
+                    <div class="activity-header">
+                        <h2 class="activity-title">Actividad Reciente</h2>
+                        <button class="chart-control" onclick="refreshActivity()">
+                            <i class="fas fa-sync-alt"></i>
+                            Actualizar
+                        </button>
+                    </div>
+                    <div class="activity-list" id="activityList">
+                        <!-- Actividad se cargará dinámicamente -->
+                        <div class="activity-item">
+                            <div class="activity-icon loading-skeleton"></div>
+                            <div class="activity-content">
+                                <div class="activity-title loading-skeleton">Cargando...</div>
+                                <div class="activity-description loading-skeleton">...</div>
+                                <div class="activity-time loading-skeleton">...</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Estado del dashboard
+        let dashboardData = {
+            metrics: {},
+            charts: {},
+            activity: [],
+            lastUpdate: null
+        };
+        
+        // Configuración de gráficos
+        const chartConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            family: 'Inter',
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleFont: {
+                        family: 'Inter',
+                        size: 14
+                    },
+                    bodyFont: {
+                        family: 'Inter',
+                        size: 12
+                    }
+                }
+            }
+        };
+        
+        // Inicialización cuando el DOM está listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📊 Inicializando Dashboard Analítico...');
+            
+            // Verificar autenticación
+            if (!window.LaboriaAPI?.isAuthenticated()) {
+                window.location.href = '/pages/index.html';
+                return;
+            }
+            
+            // Cargar datos del dashboard
+            loadDashboardData();
+            
+            // Configurar actualización automática
+            setupAutoRefresh();
+            
+            console.log('✅ Dashboard inicializado');
+        });
+        
+        // Cargar datos del dashboard
+        async function loadDashboardData() {
+            try {
+                // Mostrar loading
+                showDashboardLoading();
+                
+                // Cargar métricas
+                await loadMetrics();
+                
+                // Cargar gráficos
+                await loadCharts();
+                
+                // Cargar actividad reciente
+                await loadActivity();
+                
+                // Actualizar timestamp
+                dashboardData.lastUpdate = new Date();
+                
+                // Ocultar loading
+                hideDashboardLoading();
+                
+                console.log('📊 Datos del dashboard cargados');
+            } catch (error) {
+                console.error('❌ Error cargando dashboard:', error);
+                handleDashboardError(error);
+            }
+        }
+        
+        // Cargar métricas principales
+        async function loadMetrics() {
+            try {
+                // Simular carga de métricas (reemplazar con API real)
+                const metrics = await fetchDashboardMetrics();
+                dashboardData.metrics = metrics;
+                
+                // Renderizar métricas
+                renderMetrics(metrics);
+                
+            } catch (error) {
+                console.error('❌ Error cargando métricas:', error);
+                throw error;
+            }
+        }
+        
+        // Cargar gráficos
+        async function loadCharts() {
+            try {
+                // Cargar datos para gráficos
+                const chartsData = await fetchChartsData();
+                dashboardData.charts = chartsData;
+                
+                // Renderizar gráficos
+                renderCharts(chartsData);
+                
+            } catch (error) {
+                console.error('❌ Error cargando gráficos:', error);
+                throw error;
+            }
+        }
+        
+        // Cargar actividad reciente
+        async function loadActivity() {
+            try {
+                const activity = await fetchRecentActivity();
+                dashboardData.activity = activity;
+                
+                // Renderizar actividad
+                renderActivity(activity);
+                
+            } catch (error) {
+                console.error('❌ Error cargando actividad:', error);
+                throw error;
+            }
+        }
+        
+        // Renderizar métricas
+        function renderMetrics(metrics) {
+            const metricsGrid = document.getElementById('metricsGrid');
+            
+            const metricsHTML = [
+                {
+                    title: 'Usuarios Activos',
+                    value: metrics.activeUsers?.toLocaleString() || '0',
+                    change: metrics.activeUsersChange || 0,
+                    description: 'Usuarios en las últimas 24 horas',
+                    icon: 'users',
+                    color: 'blue'
+                },
+                {
+                    title: 'Aplicaciones',
+                    value: metrics.applications?.toLocaleString() || '0',
+                    change: metrics.applicationsChange || 0,
+                    description: 'Total de aplicaciones recibidas',
+                    icon: 'briefcase',
+                    color: 'green'
+                },
+                {
+                    title: 'Ofertas Laborales',
+                    value: metrics.jobOffers?.toLocaleString() || '0',
+                    change: metrics.jobOffersChange || 0,
+                    description: 'Ofertas activas actualmente',
+                    icon: 'building',
+                    color: 'purple'
+                },
+                {
+                    title: 'Tasa de Éxito',
+                    value: metrics.successRate || '0%',
+                    change: metrics.successRateChange || 0,
+                    description: 'Colocaciones exitosas',
+                    icon: 'chart-line',
+                    color: 'orange'
+                }
+            ].map(metric => createMetricCard(metric)).join('');
+            
+            metricsGrid.innerHTML = metricsHTML;
+        }
+        
+        // Crear tarjeta de métrica
+        function createMetricCard(metric) {
+            const changeClass = metric.change >= 0 ? 'positive' : 'negative';
+            const changeIcon = metric.change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+            const changeText = metric.change >= 0 ? `+${Math.abs(metric.change)}%` : `-${Math.abs(metric.change)}%`;
+            
+            return `
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">
+                            <i class="fas fa-${metric.icon}"></i>
+                            ${metric.title}
+                        </div>
+                        <div class="metric-icon ${metric.color}">
+                            <i class="fas fa-${metric.icon}"></i>
+                        </div>
+                    </div>
+                    <div class="metric-value">${metric.value}</div>
+                    <div class="metric-change ${changeClass}">
+                        <i class="fas ${changeIcon}"></i>
+                        ${changeText}
+                    </div>
+                    <div class="metric-description">${metric.description}</div>
+                </div>
+            `;
+        }
+        
+        // Renderizar gráficos
+        function renderCharts(chartsData) {
+            const chartsGrid = document.getElementById('chartsGrid');
+            
+            const chartsHTML = [
+                {
+                    title: 'Usuarios Activos',
+                    type: 'line',
+                    data: chartsData.activeUsers,
+                    id: 'activeUsersChart'
+                },
+                {
+                    title: 'Aplicaciones por Mes',
+                    type: 'bar',
+                    data: chartsData.applicationsByMonth,
+                    id: 'applicationsChart'
+                }
+            ].map(chart => createChartSection(chart)).join('');
+            
+            chartsGrid.innerHTML = chartsHTML;
+            
+            // Inicializar gráficos después de renderizar
+            setTimeout(() => {
+                initializeCharts(chartsData);
+            }, 100);
+        }
+        
+        // Crear sección de gráfico
+        function createChartSection(chart) {
+            return `
+                <div class="chart-section">
+                    <div class="chart-header">
+                        <h2 class="chart-title">${chart.title}</h2>
+                        <div class="chart-controls">
+                            <button class="chart-control active" onclick="changeChartPeriod('${chart.id}', '7d')">7d</button>
+                            <button class="chart-control" onclick="changeChartPeriod('${chart.id}', '30d')">30d</button>
+                            <button class="chart-control" onclick="changeChartPeriod('${chart.id}', '90d')">90d</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="${chart.id}"></canvas>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Inicializar gráficos
+        function initializeCharts(chartsData) {
+            // Gráfico de usuarios activos
+            const activeUsersCtx = document.getElementById('activeUsersChart');
+            if (activeUsersCtx) {
+                new Chart(activeUsersCtx, {
+                    type: 'line',
+                    data: chartsData.activeUsers,
+                    options: {
+                        ...chartConfig,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Usuarios'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Fecha'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Gráfico de aplicaciones
+            const applicationsCtx = document.getElementById('applicationsChart');
+            if (applicationsCtx) {
+                new Chart(applicationsCtx, {
+                    type: 'bar',
+                    data: chartsData.applicationsByMonth,
+                    options: {
+                        ...chartConfig,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Aplicaciones'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Mes'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Renderizar actividad
+        function renderActivity(activity) {
+            const activityList = document.getElementById('activityList');
+            
+            const activityHTML = activity.map(item => createActivityItem(item)).join('');
+            
+            activityList.innerHTML = activityHTML || '<p class="text-center">No hay actividad reciente</p>';
+        }
+        
+        // Crear item de actividad
+        function createActivityItem(item) {
+            const timeAgo = getTimeAgo(item.timestamp);
+            
+            return `
+                <div class="activity-item">
+                    <div class="activity-icon ${item.type}">
+                        <i class="fas fa-${item.icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">${item.title}</div>
+                        <div class="activity-description">${item.description}</div>
+                        <div class="activity-time">${timeAgo}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Obtener tiempo relativo
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const past = new Date(timestamp);
+            const diffMs = now - past;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'Justo ahora';
+            if (diffMins < 60) return `Hace ${diffMins} minutos`;
+            if (diffHours < 24) return `Hace ${diffHours} horas`;
+            if (diffDays < 7) return `Hace ${diffDays} días`;
+            
+            return past.toLocaleDateString();
+        }
+        
+        // Cambiar período de gráfico
+        function changeChartPeriod(chartId, period) {
+            // Actualizar botones activos
+            const chartSection = document.getElementById(chartId).closest('.chart-section');
+            const buttons = chartSection.querySelectorAll('.chart-control');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Recargar datos del gráfico
+            loadChartData(chartId, period);
+        }
+        
+        // Cargar datos de gráfico específico
+        async function loadChartData(chartId, period) {
+            try {
+                // Mostrar loading en el gráfico
+                const chartContainer = document.getElementById(chartId).closest('.chart-container');
+                chartContainer.classList.add('loading');
+                
+                // Simular carga de datos (reemplazar con API real)
+                const newData = await fetchChartData(chartId, period);
+                
+                // Actualizar gráfico
+                updateChart(chartId, newData);
+                
+                // Ocultar loading
+                chartContainer.classList.remove('loading');
+                
+            } catch (error) {
+                console.error('❌ Error cargando datos del gráfico:', error);
+            }
+        }
+        
+        // Actualizar gráfico
+        function updateChart(chartId, newData) {
+            const chart = Chart.getChart(chartId);
+            if (chart) {
+                chart.data = newData;
+                chart.update();
+            }
+        }
+        
+        // Refrescar actividad
+        async function refreshActivity() {
+            const refreshBtn = event.target;
+            const originalContent = refreshBtn.innerHTML;
+            
+            try {
+                // Mostrar loading
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                refreshBtn.disabled = true;
+                
+                // Recargar actividad
+                await loadActivity();
+                
+                console.log('🔄 Actividad actualizada');
+                
+            } catch (error) {
+                console.error('❌ Error actualizando actividad:', error);
+            } finally {
+                // Restaurar botón
+                refreshBtn.innerHTML = originalContent;
+                refreshBtn.disabled = false;
+            }
+        }
+        
+        // Configurar actualización automática
+        function setupAutoRefresh() {
+            // Actualizar cada 5 minutos
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    loadDashboardData();
+                }
+            }, 5 * 60 * 1000);
+            
+            // Actualizar cuando la página se hace visible
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    const timeSinceLastUpdate = Date.now() - dashboardData.lastUpdate;
+                    
+                    // Si han pasado más de 2 minutos, actualizar
+                    if (timeSinceLastUpdate > 2 * 60 * 1000) {
+                        loadDashboardData();
+                    }
+                }
+            });
+        }
+        
+        // Mostrar loading del dashboard
+        function showDashboardLoading() {
+            // Mostrar skeletons
+            document.querySelectorAll('.metric-card, .chart-section, .activity-item').forEach(el => {
+                if (!el.classList.contains('loading-skeleton')) {
+                    el.classList.add('loading-skeleton');
+                }
+            });
+        }
+        
+        // Ocultar loading del dashboard
+        function hideDashboardLoading() {
+            // Ocultar skeletons
+            document.querySelectorAll('.loading-skeleton').forEach(el => {
+                el.classList.remove('loading-skeleton');
+            });
+        }
+        
+        // Manejar error del dashboard
+        function handleDashboardError(error) {
+            console.error('❌ Error en dashboard:', error);
+            
+            if (window.LaboriaNotifications) {
+                window.LaboriaNotifications.showNotification(
+                    'Error cargando el dashboard. Intenta nuevamente.',
+                    'error'
+                );
+            }
+            
+            // Mostrar mensaje de error
+            const dashboardContainer = document.querySelector('.dashboard-container');
+            dashboardContainer.innerHTML = `
+                <div class="error-container" style="text-align: center; padding: 3rem;">
+                    <div class="error-icon" style="font-size: 4rem; color: #ef4444; margin-bottom: 1rem;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h2 style="color: var(--theme-text-primary); margin-bottom: 1rem;">Error Cargando Dashboard</h2>
+                    <p style="color: var(--theme-text-secondary); margin-bottom: 2rem;">
+                        No pudimos cargar los datos del dashboard. Por favor intenta nuevamente.
+                    </p>
+                    <button class="btn-primary" onclick="location.reload()">
+                        <i class="fas fa-sync-alt"></i>
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Funciones de API (simuladas - reemplazar con llamadas reales)
+        async function fetchDashboardMetrics() {
+            // Simular delay de red
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            return {
+                activeUsers: 1247,
+                activeUsersChange: 12.5,
+                applications: 3847,
+                applicationsChange: -5.2,
+                jobOffers: 892,
+                jobOffersChange: 8.7,
+                successRate: '78.4%',
+                successRateChange: 3.1
+            };
+        }
+        
+        async function fetchChartsData() {
+            // Simular delay de red
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const now = new Date();
+            const last30Days = Array.from({length: 30}, (_, i) => {
+                const date = new Date(now);
+                date.setDate(date.getDate() - (29 - i));
+                return date.toLocaleDateString();
+            });
+            
+            return {
+                activeUsers: {
+                    labels: last30Days,
+                    datasets: [{
+                        label: 'Usuarios Activos',
+                        data: Array.from({length: 30}, () => Math.floor(Math.random() * 500) + 800),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                applicationsByMonth: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Aplicaciones',
+                        data: [320, 450, 380, 520, 490, 610],
+                        backgroundColor: '#10b981',
+                        borderColor: '#10b981'
+                    }]
+                }
+            };
+        }
+        
+        async function fetchRecentActivity() {
+            // Simular delay de red
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            return [
+                {
+                    title: 'Nuevo usuario registrado',
+                    description: 'Juan Pérez se ha registrado en la plataforma',
+                    timestamp: new Date(Date.now() - 5 * 60 * 1000),
+                    type: 'success',
+                    icon: 'user-plus'
+                },
+                {
+                    title: 'Nueva oferta laboral',
+                    description: 'TechCorp ha publicado una nueva oferta de Desarrollador Senior',
+                    timestamp: new Date(Date.now() - 15 * 60 * 1000),
+                    type: 'info',
+                    icon: 'briefcase'
+                },
+                {
+                    title: 'Aplicación exitosa',
+                    description: 'María González ha sido contratada como Diseñadora UX',
+                    timestamp: new Date(Date.now() - 30 * 60 * 1000),
+                    type: 'success',
+                    icon: 'check-circle'
+                },
+                {
+                    title: 'Sistema actualizado',
+                    description: 'Se ha deployed la versión 2.1.0 con mejoras de rendimiento',
+                    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+                    type: 'warning',
+                    icon: 'code-branch'
+                }
+            ];
+        }
+        
+        async function fetchChartData(chartId, period) {
+            // Simular carga de datos según período
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // En una implementación real, esto llamaría a la API con el período específico
+            console.log(`📊 Cargando datos para ${chartId} con período ${period}`);
+            
+            return null; // Los datos se actualizan en updateChart
+        }
+    </script>
+</body>
+</html>
