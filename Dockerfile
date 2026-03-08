@@ -36,6 +36,31 @@ RUN npm install --omit=dev && npm cache clean --force
 # Copiar código fuente del backend
 COPY backend/ ./
 
+# Crear archivos de compatibilidad para Docker
+RUN echo '// =============================================' > server.js && \
+    echo '// SERVER - LABORIA FASE 6 NEXT-GEN' >> server.js && \
+    echo '// =============================================' >> server.js && \
+    echo '' >> server.js && \
+    echo '// Este archivo es un wrapper para el servidor principal' >> server.js && \
+    echo '// Mantiene compatibilidad con configuraciones existentes' >> server.js && \
+    echo '' >> server.js && \
+    echo '// Cargar el servidor principal' >> server.js && \
+    echo "require('./server-fase6.js');" >> server.js
+
+RUN echo '// =============================================' > server-production.js && \
+    echo '// SERVER PRODUCTION - LABORIA FASE 6 NEXT-GEN' >> server-production.js && \
+    echo '// =============================================' >> server-production.js && \
+    echo '' >> server-production.js && \
+    echo '// Este archivo es un wrapper para el servidor principal en producción' >> server-production.js && \
+    echo '// Mantiene compatibilidad con configuraciones existentes' >> server-production.js && \
+    echo '' >> server-production.js && \
+    echo '// Cargar el servidor principal' >> server-production.js && \
+    echo "require('./server-fase6.js');" >> server-production.js
+
+# Crear directorio docs con README
+RUN mkdir -p docs && \
+    echo "# Laboria API Documentation" > docs/README.md
+
 # Copiar frontend si existe
 COPY frontend/ ../frontend/
 
