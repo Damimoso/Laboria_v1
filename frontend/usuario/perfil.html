@@ -2,24 +2,69 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - Laboria</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Laboria - Mi Perfil</title>
     
-    <!-- Scripts compartidos (orden optimizado) -->
-    <script src="../shared/constants.js"></script>
-    <script src="../js/api-client.js"></script>
-    <script src="../shared/ui-system.js"></script>
-    <script src="../shared/notification-system.js"></script>
-    <script src="../shared/navigation-system.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     
-    <!-- Estilos CSS Unificados -->
-    <link rel="stylesheet" href="../styles/styles.css">
-    <link rel="stylesheet" href="../styles/accessibility-ux.css">
-    <script src="../styles/theme-switcher.js"></script>
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/assets/icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Estilos Base Compartidos -->
+    <link rel="stylesheet" href="/shared/base-styles.css">
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/accessibility-ux.css">
+    
+    <!-- Scripts compartidos (orden optimizado) -->
+    <script src="/shared/constants.js"></script>
+    <script src="/js/api-client-clean.js"></script>
+    <script src="/shared/ui-system.js"></script>
+    <script src="/shared/notification-system.js"></script>
+    <script src="/shared/navigation-system.js"></script>
+    
+    <!-- Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
+    
+    <!-- Chart.js para estadísticas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Theme Switcher -->
+    <script src="/styles/theme-switcher.js"></script>
+    
+    <!-- Meta tags para SEO -->
+    <meta name="description" content="Mi perfil en Laboria - Gestiona tu información profesional, aplicaciones y cursos">
+    <meta name="keywords" content="perfil profesional, laboria, gestión de carrera, aplicaciones de empleo">
+    <meta name="author" content="Laboria Team">
+    
+    <!-- Open Graph para redes sociales -->
+    <meta property="og:title" content="Laboria - Mi Perfil">
+    <meta property="og:description" content="Gestiona tu perfil profesional en Laboria">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/assets/og-image.jpg">
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
+        font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net;
+        img-src 'self' data: https:;
+        connect-src 'self' http://localhost:3000 http://127.0.0.1:3000 http://localhost:5500 http://127.0.0.1:5500 https://cdn.jsdelivr.net https://api.openai.com https://laboria-api.onrender.com ws://localhost:3000 ws://127.0.0.1:3000 ws://localhost:5500 ws://127.0.0.1:5500;
+        frame-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
     
     <style>
         /* Estilos mejorados para perfil de usuario - Modern Design */

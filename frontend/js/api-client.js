@@ -368,8 +368,63 @@ class LaboriaAPIClient {
             const response = await this.get(this.config.ENDPOINTS.AUTH.VERIFY);
             return response.success ? response.user : null;
         } catch (error) {
-            this.clearAuthTokens();
+            console.error('❌ Error verificando token:', error);
             return null;
+        }
+    }
+
+    async getCurrentUser() {
+        try {
+            const response = await this.get(this.config.ENDPOINTS.AUTH.CURRENT_USER);
+            return response;
+        } catch (error) {
+            console.error('❌ Error obteniendo usuario actual:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    async updateProfile(profileData) {
+        try {
+            const response = await this.put(this.config.ENDPOINTS.USER.UPDATE_PROFILE, profileData);
+            return response;
+        } catch (error) {
+            console.error('❌ Error actualizando perfil:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    async updateSettings(settings) {
+        try {
+            const response = await this.put(this.config.ENDPOINTS.USER.UPDATE_SETTINGS, settings);
+            return response;
+        } catch (error) {
+            console.error('❌ Error actualizando configuración:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    async uploadAvatar(file) {
+        try {
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            const response = await this.post(this.config.ENDPOINTS.USER.UPLOAD_AVATAR, formData, {
+                'Content-Type': 'multipart/form-data'
+            });
+            return response;
+        } catch (error) {
+            console.error('❌ Error subiendo avatar:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    async getUserStats() {
+        try {
+            const response = await this.get(this.config.ENDPOINTS.USER.GET_STATS);
+            return response;
+        } catch (error) {
+            console.error('❌ Error obteniendo estadísticas:', error);
+            return { success: false, message: error.message };
         }
     }
 
@@ -380,8 +435,6 @@ class LaboriaAPIClient {
     async getProfile() {
         return this.get(this.config.ENDPOINTS.USERS.PROFILE);
     }
-
-    async updateProfile(profileData) {
         try {
             const response = await this.put(this.config.ENDPOINTS.USERS.UPDATE_PROFILE, profileData);
             if (response.success) {
