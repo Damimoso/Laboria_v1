@@ -226,7 +226,7 @@ const CACHE_CONFIG = {
 // Configuración de seguridad
 const SECURITY_CONFIG = {
     JWT: {
-        SECRET: process.env.JWT_SECRET || 'laboria_secret_key_fase6',
+        SECRET: (typeof process !== 'undefined' && process.env.JWT_SECRET) || 'laboria_secret_key_fase6',
         EXPIRY: '24h',
         ALGORITHM: 'HS256'
     },
@@ -241,7 +241,7 @@ const SECURITY_CONFIG = {
 
 // Configuración de WebSocket
 const WEBSOCKET_CONFIG = {
-    URL: process.env.NODE_ENV === 'production' 
+    URL: (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') 
         ? 'wss://api.laboria.com' 
         : 'ws://localhost:3000',
     RECONNECT_ATTEMPTS: 5,
@@ -251,7 +251,7 @@ const WEBSOCKET_CONFIG = {
 
 // Configuración de analytics
 const ANALYTICS_CONFIG = {
-    TRACKING_ID: process.env.GA_TRACKING_ID || null,
+    TRACKING_ID: (typeof process !== 'undefined' && process.env.GA_TRACKING_ID) || null,
     EVENTS: {
         PAGE_VIEW: 'page_view',
         USER_LOGIN: 'user_login',

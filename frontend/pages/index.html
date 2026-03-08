@@ -555,6 +555,11 @@
                     const input = document.getElementById(targetId);
                     const icon = this.querySelector('i');
                     
+                    if (!input || !icon) {
+                        console.error('❌ No se encontró el input o el icono:', { targetId, input, icon });
+                        return;
+                    }
+                    
                     if (input.type === 'password') {
                         input.type = 'text';
                         icon.classList.remove('fa-eye');
@@ -594,12 +599,20 @@
             
             // Validaciones
             if (password !== confirmPassword) {
-                window.LaboriaBase.showNotification('Las contraseñas no coinciden', 'error');
+                if (window.LaboriaNotifications) {
+                    window.LaboriaNotifications.show('Las contraseñas no coinciden', 'error');
+                } else {
+                    alert('Las contraseñas no coinciden');
+                }
                 return;
             }
             
             if (password.length < 8) {
-                window.LaboriaBase.showNotification('La contraseña debe tener al menos 8 caracteres', 'error');
+                if (window.LaboriaNotifications) {
+                    window.LaboriaNotifications.show('La contraseña debe tener al menos 8 caracteres', 'error');
+                } else {
+                    alert('La contraseña debe tener al menos 8 caracteres');
+                }
                 return;
             }
             
@@ -615,18 +628,30 @@
                 
                 if (response.success) {
                     console.log('Registro exitoso:', response);
-                    window.LaboriaBase.showNotification('¡Cuenta creada exitosamente! Por favor inicia sesión.', 'success');
+                    if (window.LaboriaNotifications) {
+                        window.LaboriaNotifications.show('¡Cuenta creada exitosamente! Por favor inicia sesión.', 'success');
+                    } else {
+                        alert('¡Cuenta creada exitosamente! Por favor inicia sesión.');
+                    }
                     
                     // Limpiar formulario y volver al login
                     hideRegisterForm();
                     document.getElementById('userLoginForm').reset();
                 } else {
                     console.error('Error en registro:', response.message);
-                    window.LaboriaBase.showNotification(response.message || 'Error en el registro', 'error');
+                    if (window.LaboriaNotifications) {
+                        window.LaboriaNotifications.show(response.message || 'Error en el registro', 'error');
+                    } else {
+                        alert(response.message || 'Error en el registro');
+                    }
                 }
             } catch (error) {
                 console.error('Error en registro:', error);
-                window.LaboriaBase.showNotification('Error de conexión. Intenta nuevamente.', 'error');
+                if (window.LaboriaNotifications) {
+                    window.LaboriaNotifications.show('Error de conexión. Intenta nuevamente.', 'error');
+                } else {
+                    alert('Error de conexión. Intenta nuevamente.');
+                }
             }
         }
         
@@ -657,11 +682,19 @@
                     }
                 } else {
                     console.error('Error en login:', response.message);
-                    window.LaboriaBase.showNotification(response.message || 'Error en el login', 'error');
+                    if (window.LaboriaNotifications) {
+                        window.LaboriaNotifications.show(response.message || 'Error en el login', 'error');
+                    } else {
+                        alert(response.message || 'Error en el login');
+                    }
                 }
             } catch (error) {
                 console.error('Error en login:', error);
-                window.LaboriaBase.showNotification('Error de conexión. Intenta nuevamente.', 'error');
+                if (window.LaboriaNotifications) {
+                    window.LaboriaNotifications.show('Error de conexión. Intenta nuevamente.', 'error');
+                } else {
+                    alert('Error de conexión. Intenta nuevamente.');
+                }
             }
         }
         
@@ -694,11 +727,19 @@
                     }
                 } else {
                     console.error('Error en login:', response.message);
-                    window.LaboriaBase.showNotification(response.message || 'Error en el login', 'error');
+                    if (window.LaboriaNotifications) {
+                        window.LaboriaNotifications.show(response.message || 'Error en el login', 'error');
+                    } else {
+                        alert(response.message || 'Error en el login');
+                    }
                 }
             } catch (error) {
                 console.error('Error en login:', error);
-                window.LaboriaBase.showNotification('Error de conexión. Intenta nuevamente.', 'error');
+                if (window.LaboriaNotifications) {
+                    window.LaboriaNotifications.show('Error de conexión. Intenta nuevamente.', 'error');
+                } else {
+                    alert('Error de conexión. Intenta nuevamente.');
+                }
             }
         }
         
