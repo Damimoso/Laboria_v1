@@ -175,34 +175,231 @@ self.addEventListener('sync', (event) => {
 
 // Evento de push notification
 self.addEventListener('push', (event) => {
-    console.log('📢 Push notification recibida');
+    console.log('📢 Push notification recibida:', event);
     
-    const options = {
-        body: 'Tienes una nueva notificación de Laboria',
-        icon: '/assets/logo-blanco-vertical.png',
-        badge: '/assets/favicon.ico',
-        vibrate: [200, 100, 200],
-        data: {
-            url: '/pages/index.html'
+    if (!event.data) {
+        console.warn('⚠️ Push event sin datos');
+        return;
+    }
+    
+    try {
+        let notificationData;
+        
+        // Parsear datos del push
+        if (event.data.text) {
+            notificationData = JSON.parse(event.data.text());
+        } else if (event.data.json) {
+            notificationData = event.data.json();
+        } else {
+            notificationData = event.data;
         }
-    };
-    
-    event.waitUntil(
-        self.registration.showNotification('Laboria', options)
-    );
+        
+        // Determinar título y cuerpo
+        const title = notificationData.title || 'Nueva Notificación de Laboria';
+        const body = notificationData.body || 'Tienes una nueva notificación';
+        const icon = notificationData.icon || '/assets/logo-blanco-vertical.png';
+        const badge = notificationData.badge || '/assets/favicon.ico';
+        const tag = notificationData.tag || 'laboria-notification';
+        const data = notificationData.data || {};
+        
+        // Configurar opciones de notificación
+        const options = {
+            body: body,
+            icon: icon,
+            badge: badge,
+            tag: tag,
+            data: data,
+            requireInteraction: notificationData.requireInteraction || false,
+            silent: notificationData.silent || false,
+            timestamp: Date.now()
+        };
+        
+        // Agregar acciones si existen
+        if (notificationData.actions && notificationData.actions.length > 0) {
+            options.actions = notificationData.actions.map(action => ({
+                action: action.action,
+                title: action.title,
+                icon: action.icon
+            }));
+        }
+        
+        // Verificar si debemos mostrar la notificación (quiet hours)
+        const shouldShow = shouldShowNotification(notificationData);
+        
+        if (shouldShow) {
+            // Mostrar notificación
+            const notificationPromise = self.registration.showNotification(title, options);
+            
+            // Manejar respuesta de la notificación
+            notificationPromise.then(notification => {
+                console.log('✅ Notificación mostrada:', title);
+                
+                // Manejar click en notificación
+                notification.onclick = (event) => {
+                    event.preventDefault();
+                    
+                    // Manejar acción
+                    if (event.action) {
+                        handleNotificationAction(event.action, data);
+                    } else {
+                        // Acción por defecto: abrir URL
+                        if (data.url) {
+                            clients.openWindow(data.url);
+                        } else if (notificationData.url) {
+                            clients.openWindow(notificationData.url);
+                        }
+                    }
+                    
+                    // Cerrar notificación
+                    notification.close();
+                };
+            }).catch(error => {
+                console.error('❌ Error mostrando notificación:', error);
+            });
+            
+            // Trackear entrega
+            trackNotificationDelivery(notificationData, 'delivered');
+        } else {
+            console.log('🔕 Notificación silenciada (quiet hours)');
+            trackNotificationDelivery(notificationData, 'silenced');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error procesando push notification:', error);
+        trackNotificationDelivery({ title: 'Error', error: error.message }, 'error');
+    }
 });
 
-// Evento de click en notificación
-self.addEventListener('notificationclick', (event) => {
-    console.log('🔔 Notificación clickeada');
+// Función para determinar si se debe mostrar notificación
+function shouldShowNotification(notificationData) {
+    // Verificar quiet hours
+    const quietHours = getQuietHours();
+    if (quietHours.enabled) {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentDay = now.getDay(); // 0 = Domingo, 6 = Sábado
+        
+        // Verificar si estamos en quiet hours
+        if (quietHours.hours.includes(currentHour) && quietHours.days.includes(currentDay)) {
+            return false;
+        }
+    }
     
-    event.notification.close();
+    // Verificar preferencias de usuario
+    const userPreferences = getUserNotificationPreferences();
+    if (userPreferences.types && notificationData.type) {
+        if (!userPreferences.types.includes(notificationData.type)) {
+            return false;
+        }
+    }
     
-    // Abrir la aplicación
-    event.waitUntil(
-        clients.openWindow(event.notification.data.url || '/pages/index.html')
-    );
-});
+    return true;
+}
+
+// Función para manejar acciones de notificación
+function handleNotificationAction(action, data) {
+    console.log('🔔 Acción de notificación:', action, data);
+    
+    switch (action) {
+        case 'view':
+            // Abrir URL principal
+            if (data.url) {
+                clients.openWindow(data.url);
+            }
+            break;
+            
+        case 'reply':
+            // Abrir conversación
+            if (data.conversationId) {
+                clients.openWindow(`/pages/messages.html?conversation=${data.conversationId}`);
+            }
+            break;
+            
+        case 'calendar':
+            // Agregar al calendario
+            if (data.interviewId) {
+                clients.openWindow(`/calendar/add?interview=${data.interviewId}`);
+            }
+            break;
+            
+        default:
+            // Acción personalizada
+            if (data.actionUrl) {
+                clients.openWindow(data.actionUrl);
+            }
+            break;
+    }
+    
+    // Trackear acción
+    trackNotificationInteraction(action, data);
+}
+
+// Obtener quiet hours desde localStorage
+function getQuietHours() {
+    const saved = localStorage.getItem('push_preferences');
+    if (saved) {
+        const preferences = JSON.parse(saved);
+        return {
+            enabled: preferences.quietHoursEnabled || false,
+            hours: preferences.quietHours || [],
+            days: preferences.quietDays || [22, 23, 0, 1, 2, 3, 4, 5, 6]
+        };
+    }
+    
+    return {
+        enabled: false,
+        hours: [],
+        days: []
+    };
+}
+
+// Obtener preferencias de notificaciones del usuario
+function getUserNotificationPreferences() {
+    const saved = localStorage.getItem('push_preferences');
+    return saved ? JSON.parse(saved) : {
+        types: ['new_job_offer', 'application_update', 'new_message', 'interview_reminder', 'system_update', 'featured_job'],
+        quietHours: [22, 23, 0, 1, 2, 3, 4, 5, 6],
+        quietHoursEnabled: false
+    };
+}
+
+// Trackear entrega de notificación
+function trackNotificationDelivery(notificationData, status) {
+    // Enviar estadísticas al servidor
+    fetch('/api/push/analytics', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            type: 'delivery',
+            status: status,
+            notification: notificationData,
+            timestamp: Date.now()
+        })
+    }).catch(error => {
+        console.error('❌ Error trackeando delivery:', error);
+    });
+}
+
+// Trackear interacción con notificación
+function trackNotificationInteraction(action, data) {
+    // Enviar estadísticas al servidor
+    fetch('/api/push/analytics', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            type: 'interaction',
+            action: action,
+            data: data,
+            timestamp: Date.now()
+        })
+    }).catch(error => {
+        console.error('❌ Error trackeando interacción:', error);
+    });
+}
 
 // Estrategia: Network Only
 async function networkOnly(request) {
