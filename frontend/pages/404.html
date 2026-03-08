@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Página No Encontrada - Laboria</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/assets/icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos Base Compartidos -->
+    <link rel="stylesheet" href="/shared/base-styles.css">
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/accessibility-ux.css">
+    
+    <!-- Scripts compartidos -->
+    <script src="/shared/constants.js"></script>
+    <script src="/shared/ui-system.js"></script>
+    <script src="/shared/notification-system.js"></script>
+    <script src="/shared/navigation-system.js"></script>
+    
+    <!-- Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
+    
+    <!-- Theme Switcher -->
+    <script src="/styles/theme-switcher.js"></script>
+    
+    <!-- Meta tags SEO -->
+    <meta name="description" content="Página no encontrada - Laboria">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
+        font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net;
+        img-src 'self' data: https:;
+        connect-src 'self' http://localhost:3000 http://127.0.0.1:3000 http://localhost:5500 http://127.0.0.1:5500 https://cdn.jsdelivr.net https://api.openai.com https://laboria-api.onrender.com ws://localhost:3000 ws://127.0.0.1:3000 ws://localhost:5500 ws://127.0.0.1:5500;
+        frame-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+    
+    <style>
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 2rem;
+        }
+        
+        .error-content {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            padding: 3rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .error-code {
+            font-size: 8rem;
+            font-weight: 700;
+            color: var(--theme-primary);
+            margin-bottom: 1rem;
+            background: var(--theme-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        
+        .error-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .error-description {
+            font-size: 1.125rem;
+            color: var(--theme-text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--theme-gradient);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-secondary {
+            background: var(--theme-secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .error-icon {
+            font-size: 4rem;
+            color: var(--theme-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .search-suggestions {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .suggestions-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--theme-text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .suggestions-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            text-align: left;
+        }
+        
+        .suggestion-item {
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: var(--border-radius-sm);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--theme-text-primary);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .suggestion-item:hover {
+            background: var(--theme-primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 1rem;
+            }
+            
+            .error-content {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .error-code {
+                font-size: 6rem;
+            }
+            
+            .error-title {
+                font-size: 1.5rem;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 4rem;
+            }
+            
+            .error-description {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .error-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip link para accesibilidad -->
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+    
+    <div class="main-container">
+        <!-- Animated Background -->
+        <div class="animated-bg">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+                <div class="shape shape-4"></div>
+                <div class="shape shape-5"></div>
+            </div>
+        </div>
+        
+        <!-- Contenedor principal -->
+        <div class="error-container" id="main-content">
+            <div class="error-content">
+                <!-- Icono de error -->
+                <div class="error-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <!-- Código de error -->
+                <div class="error-code">404</div>
+                
+                <!-- Título y descripción -->
+                <h1 class="error-title">Página No Encontrada</h1>
+                <p class="error-description">
+                    Oops! La página que estás buscando no existe o ha sido movida. 
+                    Pero no te preocupes, estamos aquí para ayudarte a encontrar lo que necesitas.
+                </p>
+                
+                <!-- Botones de acción -->
+                <div class="error-actions">
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-home"></i>
+                        Ir al Inicio
+                    </a>
+                    
+                    <a href="javascript:history.back()" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver Atrás
+                    </a>
+                </div>
+                
+                <!-- Sugerencias de búsqueda -->
+                <div class="search-suggestions">
+                    <h3 class="suggestions-title">¿Quizás estabas buscando:</h3>
+                    <div class="suggestions-list">
+                        <a href="/pages/index.html" class="suggestion-item">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                        <a href="/usuario/perfil.html" class="suggestion-item">
+                            <i class="fas fa-user"></i> Mi Perfil
+                        </a>
+                        <a href="/pages/jobs.html" class="suggestion-item">
+                            <i class="fas fa-briefcase"></i> Buscar Empleos
+                        </a>
+                        <a href="/pages/courses.html" class="suggestion-item">
+                            <i class="fas fa-graduation-cap"></i> Ver Cursos
+                        </a>
+                        <a href="/pages/about.html" class="suggestion-item">
+                            <i class="fas fa-info-circle"></i> Acerca de Laboria
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Inicialización cuando el DOM está listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Página 404 inicializada...');
+            
+            // Registrar el error en analytics si está disponible
+            if (typeof gtag !== 'undefined') {
+                gtag('event', '404_page_view', {
+                    page_title: document.title,
+                    page_location: window.location.href,
+                    referrer: document.referrer
+                });
+            }
+            
+            // Loggear información de depuración
+            console.log('📍 URL solicitada:', window.location.href);
+            console.log('🔗 Referrer:', document.referrer);
+            console.log('🕐 Timestamp:', new Date().toISOString());
+            
+            // Opcional: Auto-redirect después de 10 segundos
+            let countdown = 10;
+            const countdownElement = document.createElement('p');
+            countdownElement.style.cssText = `
+                margin-top: 2rem;
+                color: var(--theme-text-secondary);
+                font-size: 0.875rem;
+            `;
+            
+            function updateCountdown() {
+                countdownElement.textContent = `Serás redirigido al inicio en ${countdown} segundos...`;
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = '/';
+                }
+            }
+            
+            // Agregar countdown al DOM
+            document.querySelector('.error-content').appendChild(countdownElement);
+            
+            // Iniciar countdown
+            updateCountdown();
+            const countdownInterval = setInterval(updateCountdown, 1000);
+            
+            // Cancelar countdown si el usuario interactúa
+            document.addEventListener('click', function() {
+                clearInterval(countdownInterval);
+                if (countdownElement.parentNode) {
+                    countdownElement.remove();
+                }
+            }, { once: true });
+            
+            console.log('✅ Página 404 lista');
+        });
+        
+        // Función para reportar el error (opcional)
+        function reportError() {
+            const errorData = {
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                referrer: document.referrer
+            };
+            
+            console.log('📊 Datos del error:', errorData);
+            
+            // Enviar a analytics o endpoint de errores
+            if (window.LaboriaAPI) {
+                window.LaboriaAPI.reportError(errorData);
+            }
+        }
+    </script>
+</body>
+</html>

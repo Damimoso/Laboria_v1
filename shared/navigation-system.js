@@ -30,6 +30,9 @@ class NavigationSystem {
         // Actualizar UI
         this.updateNavigationUI();
         
+        // Configurar manejo de 404
+        this.setup404Handling();
+        
         console.log('✅ Sistema de Navegación inicializado');
     }
 
@@ -70,33 +73,54 @@ class NavigationSystem {
     }
 
     /**
-     * Inicializar rutas de navegación según rol
+     * Inicializar rutas de navegación según rol (con rutas absolutas)
      */
     initializeRoutes() {
         return {
             guest: {
-                login: '../pages/index.html',
-                register: '../pages/register.html'
+                login: '/pages/index.html',
+                register: '/pages/index.html#register',
+                about: '/pages/about.html',
+                jobs: '/pages/jobs.html',
+                courses: '/pages/courses.html'
             },
             usuario: {
-                dashboard: '../usuario/perfil.html',
-                profile: '../usuario/perfil.html',
-                jobs: '../pages/jobs.html',
-                courses: '../pages/courses.html',
-                applications: '../pages/applications.html'
+                dashboard: '/usuario/perfil.html',
+                profile: '/usuario/perfil.html',
+                jobs: '/pages/jobs.html',
+                courses: '/pages/courses.html',
+                applications: '/usuario/applications.html',
+                settings: '/usuario/settings.html'
             },
-            administrador: {
-                dashboard: '../pages/admin-invitado/Inicio-Invi-Admin.html',
-                users: '../pages/admin-invitado/users.html',
-                jobs: '../pages/admin-invitado/jobs.html',
-                courses: '../pages/admin-invitado/courses.html',
-                reports: '../pages/admin-invitado/reports.html'
+            admin_invitado: {
+                dashboard: '/pages/admin-invitado/Inicio-Invi-Admin.html',
+                users: '/pages/admin-invitado/users.html',
+                jobs: '/pages/admin-invitado/jobs.html',
+                courses: '/pages/admin-invitado/courses.html',
+                reports: '/pages/admin-invitado/reports.html'
             },
-            administrador_master: {
-                dashboard: '../pages/admin-master/InicioAdmin.html',
-                users: '../pages/admin-master/usuarios.html',
-                jobs: '../pages/admin-master/empleos.html',
-                courses: '../pages/admin-master/cursos.html',
+            admin_master: {
+                dashboard: '/pages/admin-master/InicioAdmin.html',
+                users: '/pages/admin-master/usuarios.html',
+                jobs: '/pages/admin-master/empleos.html',
+                courses: '/pages/admin-master/cursos.html',
+                reports: '/pages/admin-master/reports.html',
+                settings: '/pages/admin-master/settings.html'
+            },
+            recruiter: {
+                dashboard: '/pages/recruiter/dashboard.html',
+                jobs: '/pages/recruiter/my-jobs.html',
+                candidates: '/pages/recruiter/candidates.html',
+                analytics: '/pages/recruiter/analytics.html'
+            },
+            company: {
+                dashboard: '/pages/company/dashboard.html',
+                profile: '/pages/company/profile.html',
+                jobs: '/pages/company/my-jobs.html',
+                analytics: '/pages/company/analytics.html'
+            }
+        };
+    }
                 analytics: '../pages/admin-master/analisis.html',
                 settings: '../pages/admin-master/ajustes.html',
                 admins: '../pages/admin-master/admins.html'
