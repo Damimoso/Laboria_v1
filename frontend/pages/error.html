@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Laboria</title>
+    <link rel="stylesheet" href="/shared/base-styles.css">
+    <link rel="stylesheet" href="/shared/responsive-styles.css">
+    <link rel="stylesheet" href="/styles/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/js/all.min.js"></script>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-content">
+            <div class="error-icon" id="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1 class="error-title" id="error-title">Error</h1>
+            <p class="error-message" id="error-message">Ha ocurrido un error inesperado.</p>
+            <div class="error-action" id="error-action">
+                <i class="fas fa-info-circle"></i>
+                Por favor intenta nuevamente o contacta al soporte.
+            </div>
+            <div class="error-code" id="error-code">Error: UNKNOWN</div>
+            <div style="margin-top: 2rem;">
+                <a href="/" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al Inicio
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/shared/error-handling.js"></script>
+    <script>
+        // Obtener parámetros de URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorType = urlParams.get('type') || 'UNKNOWN';
+        const errorId = urlParams.get('id') || '';
+        
+        // Recuperar información del error de sessionStorage
+        const lastError = JSON.parse(sessionStorage.getItem('lastError') || '{}');
+        
+        // Mostrar información del error
+        document.getElementById('error-code').textContent = `Error: ${errorType}`;
+        
+        // Actualizar contenido según tipo de error
+        const errorSystem = window.LaboriaErrorHandling;
+        if (errorSystem) {
+            const errorPage = errorSystem.errorPages[errorType] || errorSystem.errorPages.UNKNOWN;
+            
+            document.getElementById('error-title').textContent = errorPage.title;
+            document.getElementById('error-message').textContent = errorPage.message;
+            document.getElementById('error-action').innerHTML = `
+                <i class="fas fa-info-circle"></i>
+                ${errorPage.action}
+            `;
+            
+            const iconElement = document.getElementById('error-icon');
+            iconElement.innerHTML = `<i class="fas ${errorPage.icon}"></i>`;
+            iconElement.style.color = errorPage.color;
+        }
+        
+        // Limpiar sessionStorage
+        sessionStorage.removeItem('lastError');
+    </script>
+</body>
+</html>
