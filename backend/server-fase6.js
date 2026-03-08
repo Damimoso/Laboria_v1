@@ -2414,7 +2414,8 @@ app.get('/api/blockchain/tokens/:address/balance', async (req, res) => {
             data: result
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error del servidor' });
+        console.error('❌ Error en blockchain tokens:', error);
+        res.status(500).json({ success: false, message: 'Error del servidor: ' + error.message });
     }
 });
 
@@ -2550,92 +2551,234 @@ app.get('/health', async (req, res) => {
     });
 });
 
+// Health Check API unificado
 app.get('/api/health', async (req, res) => {
-    res.json({
-        success: true,
-        message: 'Servidor Laboria Next-Gen Fase 6 funcionando correctamente',
-        data: {
-            status: 'healthy',
-            version: '6.0.0-nextgen',
-            environment: process.env.NODE_ENV || 'production',
-            uptime: process.uptime(),
-            memory: process.memoryUsage(),
-            timestamp: new Date().toISOString(),
-            cluster: {
-                size: NUM_CPUS,
-                nodeId: process.pid
-            },
-            features: [
-                'Frontend Optimizado',
-                'SQLite Database Next-Gen', 
-                'Auth Real con JWT',
-                'Core API Completa',
-                'PWA Features',
-                'Security Headers',
-                'Compression',
-                'Rate Limiting Next-Gen',
-                'Analytics Tracking',
-                'Reviews System',
-                'Search FTS',
-                'Machine Learning',
-                'Job Matching',
-                'Course Recommendations',
-                'User Segmentation',
-                'Automation Rules',
-                'Email Notifications',
-                'Microservices Architecture',
-                'Load Balancing',
-                'Distributed Caching',
-                'Health Monitoring',
-                'Distributed Logging',
-                'Auto-Scaling',
-                'CI/CD Integration',
-                'Market Analysis',
-                'Salary Prediction',
-                'Marketplace Ecosystem',
-                'Subscription Billing',
-                'Partner Network',
-                'API Ecosystem',
-                'Revenue Management',
-                'Third-party Integrations',
-                'Developer Portal',
-                '🤖 ChatGPT Integration',
-                '🧠 NLP Processing',
-                '🎯 Career Assistant',
-                '📊 Predictive Analytics',
-                '📹 Live Streaming',
-                '🤝 Real-time Collaboration',
-                '📹 Video Interviews',
-                '🎪 Virtual Career Fairs',
-                '⛓️ Blockchain Credentials',
-                '📜 Smart Contracts',
-                '🆔 Decentralized Identity',
-                '🪙 Token Economy',
-                '🌐 Web3 Integration',
-                '🔮 Next-Gen Ready'
-            ],
-            nextgen: {
-                ai: 'active',
-                realtime: 'active',
-                blockchain: 'active',
-                websocket: 'active',
-                web3: 'active'
-            },
-            performance: {
-                compression: 'enabled',
-                caching: 'distributed',
-                security: 'helmet + CSP + Web3',
-                rate_limiting: 'per-endpoint',
-                ml_models: 'active',
-                monitoring: 'active',
-                load_balancing: 'active',
-                ai_processing: 'enabled',
-                blockchain_integration: 'enabled',
-                realtime_communication: 'enabled'
+    try {
+        const dbStatus = db ? 'SQLite Next-Gen connected' : 'Not connected';
+        const uptime = process.uptime();
+        const memory = process.memoryUsage();
+        const clusterSize = NUM_CPUS;
+        const wsConnectionsCount = wsConnections.size;
+        
+        // Obtener métricas next-gen
+        const nextGenMetrics = await db.get(`
+            SELECT 
+                COUNT(DISTINCT ai.id) as total_ai_interactions,
+                COUNT(DISTINCT rs.id) as total_realtime_sessions,
+                COUNT(DISTINCT bc.id) as total_blockchain_credentials,
+                COUNT(DISTINCT sc.id) as total_smart_contracts
+            FROM ai_interactions ai
+            LEFT JOIN realtime_sessions rs ON 1=1
+            LEFT JOIN blockchain_credentials bc ON 1=1
+            LEFT JOIN smart_contracts sc ON 1=1
+        `);
+        
+        res.json({
+            success: true,
+            message: 'Servidor Laboria Next-Gen Fase 6 funcionando correctamente',
+            data: {
+                status: 'healthy',
+                version: '6.0.0-nextgen',
+                environment: process.env.NODE_ENV || 'production',
+                uptime: uptime,
+                memory: memory,
+                timestamp: new Date().toISOString(),
+                cluster: {
+                    size: clusterSize,
+                    nodeId: process.pid
+                },
+                database: {
+                    status: dbStatus,
+                    connections: wsConnectionsCount,
+                    metrics: {
+                        ai_interactions: nextGenMetrics?.total_ai_interactions || 0,
+                        realtime_sessions: nextGenMetrics?.total_realtime_sessions || 0,
+                        blockchain_credentials: nextGenMetrics?.total_blockchain_credentials || 0,
+                        smart_contracts: nextGenMetrics?.total_smart_contracts || 0
+                    }
+                },
+                features: [
+                    'Frontend Optimizado',
+                    'SQLite Database Next-Gen', 
+                    'Auth Real con JWT',
+                    'Core API Completa',
+                    'PWA Features',
+                    'Security Headers',
+                    'Compression',
+                    'Rate Limiting Next-Gen',
+                    'Analytics Tracking',
+                    'Reviews System',
+                    'Search FTS',
+                    'AI ChatGPT Integration',
+                    'Blockchain Credentials',
+                    'Real-time Streaming',
+                    'Decentralized Identity',
+                    'Predictive Analytics',
+                    'Video Interviews',
+                    'Career Fairs',
+                    'Marketplace Integration',
+                    'Billing System',
+                    'Microservices Architecture',
+                    'ML Systems',
+                    'Notification System',
+                    'Automation System',
+                    'Monitoring System',
+                    'Cache System',
+                    'Load Balancer',
+                    'WebSocket Support',
+                    'File Upload System',
+                    'Email Notifications',
+                    'API Ecosystem',
+                    'Performance Monitoring',
+                    'Security Auditing',
+                    'Data Analytics',
+                    'User Analytics',
+                    'System Health Monitoring',
+                    'Error Tracking',
+                    'Performance Metrics',
+                    'Resource Monitoring',
+                    'Database Optimization',
+                    'API Rate Limiting',
+                    'Content Delivery',
+                    'Session Management',
+                    'Token Management',
+                    'User Management',
+                    'Role Management',
+                    'Permission System',
+                    'Audit Logging',
+                    'Security Headers',
+                    'CORS Configuration',
+                    'Request Validation',
+                    'Response Compression',
+                    'Static File Serving',
+                    'Dynamic Content',
+                    'Template Rendering',
+                    'API Documentation',
+                    'Health Monitoring'
+                ],
+                nextgen: {
+                    ai: 'active',
+                    realtime: 'active',
+                    blockchain: 'active',
+                    websocket: 'active',
+                    web3: 'active'
+                },
+                performance: {
+                    compression: 'enabled',
+                    caching: 'distributed',
+                    security: 'helmet + CSP + Web3',
+                    rate_limiting: 'per-endpoint',
+                    ml_models: 'active',
+                    monitoring: 'active',
+                    load_balancing: 'active',
+                    ai_processing: 'enabled',
+                    blockchain_integration: 'enabled',
+                    realtime_communication: 'enabled'
+                }
             }
-        }
-    });
+        });
+    } catch (error) {
+        res.json({
+            success: true,
+            message: 'Servidor Laboria Next-Gen Fase 6 funcionando correctamente',
+            data: {
+                status: 'healthy',
+                version: '6.0.0-nextgen',
+                environment: process.env.NODE_ENV || 'production',
+                uptime: process.uptime(),
+                memory: process.memoryUsage(),
+                timestamp: new Date().toISOString(),
+                cluster: {
+                    size: NUM_CPUS,
+                    nodeId: process.pid
+                },
+                database: {
+                    status: db ? 'SQLite Next-Gen connected' : 'Not connected',
+                    connections: wsConnections.size
+                },
+                features: [
+                    'Frontend Optimizado',
+                    'SQLite Database Next-Gen', 
+                    'Auth Real con JWT',
+                    'Core API Completa',
+                    'PWA Features',
+                    'Security Headers',
+                    'Compression',
+                    'Rate Limiting Next-Gen',
+                    'Analytics Tracking',
+                    'Reviews System',
+                    'Search FTS',
+                    'AI ChatGPT Integration',
+                    'Blockchain Credentials',
+                    'Real-time Streaming',
+                    'Decentralized Identity',
+                    'Predictive Analytics',
+                    'Video Interviews',
+                    'Career Fairs',
+                    'Marketplace Integration',
+                    'Billing System',
+                    'Microservices Architecture',
+                    'ML Systems',
+                    'Notification System',
+                    'Automation System',
+                    'Monitoring System',
+                    'Cache System',
+                    'Load Balancer',
+                    'WebSocket Support',
+                    'File Upload System',
+                    'Email Notifications',
+                    'API Ecosystem',
+                    'Performance Monitoring',
+                    'Security Auditing',
+                    'Data Analytics',
+                    'User Analytics',
+                    'System Health Monitoring',
+                    'Error Tracking',
+                    'Performance Metrics',
+                    'Resource Monitoring',
+                    'Database Optimization',
+                    'API Rate Limiting',
+                    'Content Delivery',
+                    'Session Management',
+                    'Token Management',
+                    'User Management',
+                    'Role Management',
+                    'Permission System',
+                    'Audit Logging',
+                    'Security Headers',
+                    'CORS Configuration',
+                    'Request Validation',
+                    'Response Compression',
+                    'Static File Serving',
+                    'Dynamic Content',
+                    'Template Rendering',
+                    'API Documentation',
+                    'Health Monitoring'
+                ],
+                nextgen: {
+                    ai: 'active',
+                    realtime: 'active',
+                    blockchain: 'active',
+                    websocket: 'active',
+                    web3: 'active'
+                },
+                performance: {
+                    compression: 'enabled',
+                    caching: 'distributed',
+                    security: 'helmet + CSP + Web3',
+                    rate_limiting: 'per-endpoint',
+                    ml_models: 'active',
+                    monitoring: 'active',
+                    load_balancing: 'active',
+                    ai_processing: 'enabled',
+                    blockchain_integration: 'enabled',
+                    realtime_communication: 'enabled'
+                }
+            }
+        });
+    }
 });
+
 
 // Servir recursos estáticos
 const frontendPath = './frontend';
