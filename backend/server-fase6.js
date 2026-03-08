@@ -21,13 +21,22 @@ const WebSocket = require('ws');
 const http = require('http');
 
 // Cargar variables de entorno
-require('dotenv').config({ path: '.env.production' });
+if (process.env.NODE_ENV === 'production') {
+    require('dotenv').config({ path: '.env.production' });
+} else {
+    require('dotenv').config(); // Cargar .env normal para desarrollo
+}
 
 const app = express();
+
+// Configuración del servidor
 const server = http.createServer(app);
 const PORT = process.env.PORT || 10000;
 const HOST = '0.0.0.0';
-const NUM_CPUS = process.env.WORKERS || os.cpus().length;
+
+// Para desarrollo, siempre usar 1 worker sin importar los CPUs
+const IS_DEVELOPMENT = process.env.NODE_ENV !== 'production';
+const NUM_CPUS = IS_DEVELOPMENT ? 1 : (process.env.WORKERS || os.cpus().length);
 
 // WebSocket Server para real-time features
 const wss = new WebSocket.Server({ server });
@@ -301,9 +310,13 @@ let activeStreams = new Map();
 async function initDatabase() {
     try {
         console.log('🗄️ Inicializando base de datos Next-Gen Fase 6...');
+        console.log(`🔧 Modo: ${IS_DEVELOPMENT ? 'Desarrollo' : 'Producción'}`);
+        console.log(`🖥️ Workers: ${NUM_CPUS}`);
+        console.log(`🔍 NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
+        console.log(`🔍 IS_DEVELOPMENT: ${IS_DEVELOPMENT}`);
         
         // Para desarrollo, usar una sola conexión simple
-        if (process.env.NODE_ENV !== 'production') {
+        if (IS_DEVELOPMENT) {
             console.log('🔧 Modo desarrollo detectado - usando base de datos simple');
             const connection = await open({
                 filename: './laboria_fase6_0.db',
@@ -325,12 +338,14 @@ async function initDatabase() {
             // Exponer la base de datos globalmente
             global.db = db;
             
-            console.log('✅ Base de datos de desarrollo inicializada');
+            console.log('✅ Base de datos de desarrollo inicializada (1 conexión)');
+            console.log('🎯 SALIENDO de initDatabase - modo desarrollo');
         } else {
             // Modo producción - múltiples conexiones para load balancing
             console.log('🚀 Modo producción detectado - usando load balancing');
             
             for (let i = 0; i < NUM_CPUS; i++) {
+                console.log(`📊 Creando base de datos ${i} de ${NUM_CPUS}`);
                 const connection = await open({
                     filename: `./laboria_fase6_${i}.db`,
                     driver: sqlite3.Database
@@ -355,7 +370,11 @@ async function initDatabase() {
             global.db = db;
             
             console.log(`✅ Base de datos de producción inicializada con ${NUM_CPUS} conexiones`);
+            console.log('🎯 SALIENDO de initDatabase - modo producción');
         }
+        
+        // Crear tablas comunes para ambos modos
+        console.log('🗂️ Creando tablas del sistema...');
         
         // Crear tablas AI para Fase 6
         await db.exec(`

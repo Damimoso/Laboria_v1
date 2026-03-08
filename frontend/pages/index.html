@@ -57,7 +57,7 @@
     <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
     
     <!-- Viewport para responsive design -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     
     <!-- Apple Touch Icon -->
     <link rel="apple-touch-icon" href="../assets/icon-192x192.png">
@@ -104,6 +104,28 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 2rem;
+        }
+        
+        /* Logo responsive */
+        .logo-image img {
+            width: 100%;
+            max-width: 240px;
+            height: auto;
+            max-height: 360px;
+            object-fit: contain;
+        }
+        
+        /* Login card responsive */
+        .login-card {
+            max-width: 500px;
+            width: 90%;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         /* Skip link para accesibilidad */
@@ -541,21 +563,78 @@
             color: var(--theme-primary);
             text-decoration: none;
             font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
         }
         
         .register-link:hover {
-            text-decoration: underline;
+            text-decoration: none;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
         }
         
         /* Responsive */
         @media (max-width: 768px) {
             .login-card {
                 margin: 1rem;
-                padding: 2rem;
+                padding: 1.5rem;
+                width: 95%;
+            }
+            
+            .logo-image img {
+                max-width: 180px;
+                max-height: 270px;
+            }
+            
+            .tagline {
+                font-size: 0.9rem;
             }
             
             .shape {
                 display: none;
+            }
+            
+            .modern-form {
+                gap: 1rem;
+            }
+            
+            .form-group {
+                margin-bottom: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .login-card {
+                margin: 0.5rem;
+                padding: 1rem;
+                width: 98%;
+            }
+            
+            .logo-image img {
+                max-width: 140px;
+                max-height: 210px;
+            }
+            
+            .tagline {
+                font-size: 0.8rem;
+                margin: 0.5rem 0;
+            }
+            
+            .btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .login-card {
+                padding: 0.75rem;
+            }
+            
+            .logo-image img {
+                max-width: 120px;
+                max-height: 180px;
             }
         }
     </style>
@@ -620,7 +699,8 @@
                     </form>
                     
                     <div class="login-footer">
-                        <p>¿No tienes cuenta? <a href="#" class="register-link" onclick="showRegisterForm()">Crear cuenta</a></p>
+                        <p>¿No tienes cuenta? <a href="#" class="register-link" onclick="showRegisterForm()"><strong>cho esto </strong>Crear cuenta gratuita</strong></a></p>
+                        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">🚀 Únete a miles de profesionales</p>
                     </div>
                     
                     <!-- Botón para ir al login de administradores -->

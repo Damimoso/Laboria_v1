@@ -6,7 +6,7 @@
 const API_CONFIG = {
     BASE_URL: (typeof window !== 'undefined' && window.location.hostname === 'laboria.onrender.com') 
         ? 'https://laboria-api.onrender.com/api'
-        : 'http://127.0.0.1:10000/api',
+        : 'http://127.0.0.1:3000/api',
     TIMEOUT: 15000,
     RETRY_ATTEMPTS: 3,
     ENDPOINTS: {
