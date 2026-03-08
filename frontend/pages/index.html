@@ -29,6 +29,7 @@
     <!-- Scripts compartidos (orden optimizado) -->
     <script src="/shared/constants.js"></script>
     <script src="/shared/device-detection.js"></script>
+    <script src="/shared/loading-system.js"></script>
     <script src="/js/api-client.js"></script>
     <script src="/shared/ui-system.js"></script>
     <script src="/shared/notification-system.js"></script>
@@ -661,50 +662,41 @@
                     window.LaboriaNotifications.showNotification('Error de conexión. Intenta nuevamente.', 'error');
                 } else {
                     alert('Error de conexión. Intenta nuevamente.');
-                }
-            }
-        }
-        
-        // Función de login de usuario
-        async function handleUserLogin(event) {
-            event.preventDefault();
-            
-            const email = document.getElementById('userEmail').value;
-            const password = document.getElementById('userPassword').value;
-            
-            try {
-                console.log('Intentando login de usuario:', email);
                 
-                const response = await window.LaboriaAPI.loginUsuario(email, password);
+                // Mostrar loading en botón
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                window.LaboriaLoading.showButtonLoading(submitBtn, {
+                    content: '<i class="fas fa-spinner fa-spin"></i> Creando cuenta...'
+                });
+                
+                const response = await window.LaboriaAPI.registerUsuario(formData);
                 
                 if (response.success) {
-                    console.log('Login de usuario exitoso:', response);
+                    console.log('✅ Registro exitoso:', response);
                     
-                    // Guardar datos del usuario
-                    window.LaboriaAPI.usuarioActual = response.data.user;
-                    window.LaboriaAPI.saveAuthTokens(response.data.token, response.data.user);
-                    
-                    // Redirigir según el rol
-                    if (response.data.user.rol === 'user') {
-                        window.location.href = '/usuario/perfil.html';
-                    } else {
-                        window.location.href = '/pages/admin-master/InicioAdmin.html';
-                    }
-                } else {
-                    console.error('Error en login:', response.message);
                     if (window.LaboriaNotifications) {
-                        window.LaboriaNotifications.showNotification(response.message || 'Error en el login', 'error');
-                    } else {
-                        alert(response.message || 'Error en el login');
+                        window.LaboriaNotifications.showNotification('¡Cuenta creada exitosamente! Redirigiendo...', 'success');
+                    }
+                    
+                    // Auto-login después del registro
+                    setTimeout(() => {
+                        window.location.href = '/usuario/perfil.html';
+                    }, 2000);
+                } else {
+                    console.error('❌ Error en registro:', response.message);
+                    if (window.LaboriaNotifications) {
+                        window.LaboriaNotifications.showNotification(response.message || 'Error en el registro', 'error');
                     }
                 }
             } catch (error) {
-                console.error('Error en login:', error);
+                console.error('❌ Error en registro:', error);
                 if (window.LaboriaNotifications) {
                     window.LaboriaNotifications.showNotification('Error de conexión. Intenta nuevamente.', 'error');
-                } else {
-                    alert('Error de conexión. Intenta nuevamente.');
                 }
+            } finally {
+                // Ocultar loading del botón
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                window.LaboriaLoading.hideButtonLoading(submitBtn, false);
             }
         }
         
