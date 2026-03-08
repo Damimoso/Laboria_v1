@@ -4343,6 +4343,28 @@ body[data-theme="winter"] .animated-bg::after {
 }
 
 /* ===== RESPONSIVE DESIGN MEJORADO ===== */
+
+/* Mobile First Approach - Tablets y móviles */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 1rem;
+        max-width: 100%;
+    }
+    
+    .modern-header .header-container {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .header-nav {
+        order: 3;
+        width: 100%;
+        margin-top: 1rem;
+        justify-content: center;
+    }
+}
+
 @media (max-width: 768px) {
     :root {
         --border-radius-sm: 6px;
@@ -4350,27 +4372,46 @@ body[data-theme="winter"] .animated-bg::after {
         --border-radius-lg: 14px;
         --transition-fast: 0.2s;
         --transition-normal: 0.25s;
+        --font-size-base: 14px;
     }
     
     h1 { font-size: 2rem; }
     h2 { font-size: 1.5rem; }
     h3 { font-size: 1.25rem; }
     
+    .container {
+        padding: 0 0.75rem;
+    }
+    
     .btn {
         min-height: 44px; /* Touch target mínimo */
         font-size: 16px; /* Prevenir zoom en iOS */
         padding: 12px 20px;
         touch-action: manipulation; /* Sin delay */
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
     }
     
     .card {
         padding: 1.5rem;
-        margin: 1rem;
+        margin: 1rem 0;
+        border-radius: var(--border-radius-lg);
     }
     
     .login-card {
         padding: 30px 20px;
         border-radius: 20px;
+        margin: 1rem;
+        max-width: 100%;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
     }
     
     .form-input,
@@ -4378,6 +4419,18 @@ body[data-theme="winter"] .animated-bg::after {
     .form-textarea {
         font-size: 16px; /* Prevenir zoom */
         padding: 14px 16px;
+        border-radius: var(--border-radius-md);
+        width: 100%;
+    }
+    
+    .logo-image img {
+        width: 180px !important;
+        height: 270px !important;
+    }
+    
+    .tagline {
+        font-size: 1rem;
+        margin-top: 0.5rem;
     }
     
     /* Reducir animaciones en mobile */
@@ -4390,30 +4443,60 @@ body[data-theme="winter"] .animated-bg::after {
     .animated-bg::after {
         animation-duration: 12s;
     }
+    
+    /* Navigation mobile */
+    .header-nav {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .nav-link {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
 }
 
+/* Small phones */
 @media (max-width: 480px) {
+    :root {
+        --font-size-base: 13px;
+    }
+    
     h1 { font-size: 1.75rem; }
     h2 { font-size: 1.25rem; }
+    h3 { font-size: 1.1rem; }
+    
+    .container {
+        padding: 0 0.5rem;
+    }
     
     .btn {
         padding: 10px 16px;
         font-size: 16px;
+        min-height: 48px;
     }
     
     .card {
         padding: 1.25rem;
+        margin: 0.75rem 0;
     }
     
     .login-card {
         padding: 25px 15px;
         border-radius: 16px;
+        margin: 0.5rem;
     }
     
     .form-input,
     .form-select,
     .form-textarea {
         padding: 12px 14px;
+        font-size: 16px;
+    }
+    
+    .logo-image img {
+        width: 150px !important;
+        height: 225px !important;
     }
     
     .welcome-title {
@@ -4421,29 +4504,142 @@ body[data-theme="winter"] .animated-bg::after {
     }
     
     .welcome-section {
-        padding: 1.5rem;
+        padding: 1.5rem 1rem;
+    }
+    
+    .form-options {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+    
+    .checkbox-wrapper {
+        font-size: 14px;
     }
 }
 
+/* Extra small phones */
+@media (max-width: 360px) {
+    .login-card {
+        padding: 20px 12px;
+    }
+    
+    .logo-image img {
+        width: 120px !important;
+        height: 180px !important;
+    }
+    
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.1rem; }
+}
+
+/* Large desktops */
 @media (min-width: 1200px) {
     :root {
         --border-radius-sm: 10px;
         --border-radius-md: 16px;
         --border-radius-lg: 24px;
+        --font-size-base: 16px;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
     }
     
     .card {
         padding: 2.5rem;
+        margin: 1.5rem 0;
     }
     
     .login-card {
         padding: 50px;
+        max-width: 500px;
     }
     
     .form-input,
     .form-select,
     .form-textarea {
-        padding: 18px 24px;
+        padding: 16px 20px;
+        font-size: 16px;
+    }
+}
+
+/* Ultra wide screens */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1400px;
+    }
+    
+    .login-card {
+        max-width: 550px;
+    }
+}
+
+/* Landscape orientation fixes */
+@media (max-width: 768px) and (orientation: landscape) {
+    .login-card {
+        padding: 20px;
+        margin: 1rem auto;
+        max-width: 90%;
+    }
+    
+    .logo-image img {
+        width: 120px !important;
+        height: 180px !important;
+    }
+    
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo-image img {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Dark mode support for responsive */
+@media (prefers-color-scheme: dark) {
+    .login-card {
+        background: rgba(30, 41, 59, 0.95);
+        backdrop-filter: blur(10px);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .shape,
+    .animated-bg::before,
+    .animated-bg::after {
+        animation: none !important;
+    }
+    
+    .btn {
+        transition: none !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .animated-bg,
+    .shape {
+        display: none !important;
+    }
+    
+    .login-card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+    
+    .btn {
+        background: #fff !important;
+        color: #000 !important;
+        border: 1px solid #000 !important;
     }
 }
 
