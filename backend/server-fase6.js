@@ -31,12 +31,13 @@ const app = express();
 
 // Configuración del servidor
 const server = http.createServer(app);
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
 
-// Para desarrollo, siempre usar 1 worker sin importar los CPUs
+// Para producción en Render, usar 1 worker para evitar problemas de recursos
 const IS_DEVELOPMENT = process.env.NODE_ENV !== 'production';
-const NUM_CPUS = IS_DEVELOPMENT ? 1 : (process.env.WORKERS || os.cpus().length);
+const IS_RENDER = process.env.RENDER || process.env.RENDER_SERVICE_ID || false;
+const NUM_CPUS = (IS_DEVELOPMENT || IS_RENDER) ? 1 : (process.env.WORKERS || os.cpus().length);
 
 // WebSocket Server para real-time features
 const wss = new WebSocket.Server({ server });
